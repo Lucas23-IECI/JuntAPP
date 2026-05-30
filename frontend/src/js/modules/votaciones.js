@@ -48,9 +48,65 @@ export const votacionesModule = {
     }
 
     // Admin create new poll button
-    if (openAddPollModalBtn) {
+    const addPollModal = document.getElementById("addPollModal");
+    const addPollForm = document.getElementById("addPollForm");
+    
+    if (openAddPollModalBtn && addPollModal) {
       openAddPollModalBtn.addEventListener("click", () => {
-        alert("Demo Votación: Esta característica permite a la directiva subir preguntas encriptadas en la base de datos. En el MVP definitivo podrás redactar el título, las alternativas y fijar la fecha límite.");
+        addPollModal.classList.add("active");
+      });
+    }
+
+    if (addPollForm && addPollModal) {
+      const closeBtn = addPollModal.querySelector("[data-close-modal]");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+          addPollForm.reset();
+          addPollModal.classList.remove("active");
+        });
+      }
+
+      addPollForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const title = document.getElementById("pollTitleInput").value.trim();
+        const description = document.getElementById("pollDescInput").value.trim();
+        const opt1 = document.getElementById("pollOpt1").value.trim();
+        const opt2 = document.getElementById("pollOpt2").value.trim();
+        const opt3 = document.getElementById("pollOpt3").value.trim();
+
+        const options = [
+          { text: opt1 },
+          { text: opt2 }
+        ];
+        if (opt3) {
+          options.push({ text: opt3 });
+        }
+
+        try {
+          await db.addPoll({
+            title,
+            description,
+            options
+          });
+
+          addPollForm.reset();
+          addPollModal.classList.remove("active");
+          
+          // Refresh views
+          await this.render();
+          
+          // Force layout state reload
+          const activeNav = document.querySelector(".nav-item.active");
+          if (activeNav) {
+            window.dispatchEvent(new HashChangeEvent("hashchange"));
+          }
+          
+          alert("¡Consulta ciudadana creada exitosamente!");
+        } catch (err) {
+          console.error("Failed to create poll:", err);
+          alert("Error al crear la consulta: " + (err.message || ""));
+        }
       });
     }
   },
