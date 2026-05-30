@@ -659,6 +659,48 @@
     </div>
   </div>
 
+  <!-- MODAL: ADD POLL -->
+  <div class="modal" id="addPollModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Crear Nueva Votación</h3>
+          <button class="modal-close" data-close-modal aria-label="Cerrar">&times;</button>
+        </div>
+        <form id="addPollForm">
+          <div class="modal-body">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label class="form-label" for="pollTitleInput">Título de la Consulta <span class="required">*</span></label>
+                <input type="text" id="pollTitleInput" name="title" autocomplete="off" class="form-input" placeholder="Ej: Prioridad de Inversión FONDEVE 2026..." required />
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="pollDescInput">Descripción / Detalles <span class="required">*</span></label>
+                <textarea id="pollDescInput" name="description" autocomplete="off" class="form-input" rows="3" placeholder="Explique el propósito de la consulta..." required></textarea>
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="pollOpt1">Alternativa 1 <span class="required">*</span></label>
+                <input type="text" id="pollOpt1" name="opt1" autocomplete="off" class="form-input" placeholder="Ej: Cámaras de Seguridad..." required />
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="pollOpt2">Alternativa 2 <span class="required">*</span></label>
+                <input type="text" id="pollOpt2" name="opt2" autocomplete="off" class="form-input" placeholder="Ej: Repavimentación de pasajes..." required />
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="pollOpt3">Alternativa 3 (Opcional)</label>
+                <input type="text" id="pollOpt3" name="opt3" autocomplete="off" class="form-input" placeholder="Ej: Nuevas luminarias LED..." />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" data-close-modal>Cancelar</button>
+            <button type="submit" class="btn btn-primary">Crear Consulta</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Real-time Toast Notifications Container -->
   <div id="toast-container" class="toast-container"></div>
 
