@@ -560,18 +560,32 @@ export const db = {
 
   async addPoll(poll) {
     if (isCloudActive) {
+      // Deactivate any currently active polls first
+      try {
+        await supabaseClient
+          .from('polls')
+          .update({ active: false })
+          .eq('active', true);
+      } catch (err) {
+        console.warn("Failed to deactivate older active polls in Supabase:", err);
+      }
+
       const { data, error } = await supabaseClient
         .from('polls')
         .insert({
           title: poll.title,
           description: poll.description,
-          options: poll.options.map(opt => ({ id: opt.id, text: opt.text, votes: 0 })),
+          options: poll.options.map((opt, i) => ({ id: `opt-${i + 1}`, text: opt.text, votes: 0 })),
           active: true
         });
       if (error) throw error;
       return data;
     } else {
       const polls = JSON.parse(localStorage.getItem("juntapp_polls")) || [];
+      
+      // Deactivate all previous polls
+      polls.forEach(p => p.active = false);
+
       const newPoll = {
         id: "poll-" + Date.now(),
         title: poll.title,
