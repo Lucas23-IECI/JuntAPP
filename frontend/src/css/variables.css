@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Bricolage+Grotesque:wght@300..800&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Sora:wght@100..800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Syne:wght@400..800&display=swap');
+
+/* ==========================================================================
+   JuntAPP CSS Design System
+   Sleek Navy & Warm Red Chilean Palette | High Accessibility (Elderly Friendly)
+   ========================================================================== */
+
+/* --- Custom Variables & Theme Tokens --- */
+:root {
+  /* Colors */
+  --primary: hsl(215, 60%, 16%);          /* Institutional Trust Navy */
+  --primary-light: hsl(215, 50%, 28%);
+  --primary-lighter: hsl(210, 85%, 55%);  /* Sleek blue for focus and active states */
+  --primary-subtle: hsl(215, 40%, 96%);
+  --primary-glow: rgba(59, 130, 246, 0.15);
+  
+  --primary-gradient: var(--primary);
+  --primary-light-gradient: var(--primary-light);
+  
+  --accent: hsl(354, 70%, 46%);           /* Warm Chilean Red/Crimson */
+  --accent-light: hsl(354, 80%, 56%);
+  --accent-subtle: hsl(354, 70%, 97%);
+  --accent-gradient: var(--accent);
+
+  --success: hsl(145, 63%, 42%);          /* Emerald Green */
+  --success-light: hsl(145, 50%, 96%);
+  --success-gradient: var(--success);
+  
+  --warning: hsl(35, 90%, 50%);            /* Amber */
+  --warning-subtle: hsl(35, 90%, 97%);
+
+  --accent-orange: hsl(24, 95%, 53%);     /* Solar Orange */
+  --accent-orange-light: hsl(24, 95%, 63%);
+  --accent-orange-gradient: var(--accent-orange);
+
+  /* Neutrals (Light Mode Default) */
+  --bg: hsl(30, 18%, 96%);                /* Soft warm bone white */
+  --bg-card: hsl(0, 0%, 100%);
+  --bg-sidebar: hsl(215, 60%, 11%);       /* Deep dark navy for navigation */
+  --border: hsl(30, 10%, 89%);            /* Soft border */
+  --border-hover: hsl(30, 10%, 82%);
+  
+  --text: hsl(220, 40%, 12%);
+  --text-secondary: hsl(220, 15%, 35%);
+  --text-tertiary: hsl(220, 10%, 55%);
+  --text-on-primary: hsl(0, 0%, 100%);
+
+  /* Shadows (Premium Depth) */
+  --shadow-sm: 0 2px 8px rgba(10, 25, 47, 0.04), 0 1px 2px rgba(10, 25, 47, 0.02);
+  --shadow-md: 0 8px 24px rgba(10, 25, 47, 0.06), 0 2px 6px rgba(10, 25, 47, 0.03);
+  --shadow-lg: 0 16px 40px rgba(10, 25, 47, 0.08), 0 4px 12px rgba(10, 25, 47, 0.03);
+  --shadow-xl: 0 24px 60px rgba(10, 25, 47, 0.12), 0 8px 20px rgba(10, 25, 47, 0.05);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.12);
+
+  /* Borders & Spacing */
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+  --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- Dark Mode Override --- */
+[data-theme="dark"] {
+  --bg: hsl(220, 25%, 9%);               /* Deep slate dark */
+  --bg-card: hsl(220, 25%, 13%);
+  --bg-sidebar: hsl(220, 30%, 7%);       /* Extra dark sidebar */
+  --border: hsl(220, 15%, 21%);
+  --border-hover: hsl(220, 15%, 28%);
+
+  --text: hsl(220, 20%, 93%);
+  --text-secondary: hsl(220, 15%, 72%);
+  --text-tertiary: hsl(220, 10%, 52%);
+
+  --primary-subtle: hsl(218, 30%, 15%);
+  --accent-subtle: hsl(354, 30%, 16%);
+  --success-light: hsl(145, 30%, 14%);
+  --warning-subtle: hsl(35, 30%, 14%);
+  --accent-orange-subtle: hsl(24, 30%, 14%);
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.3);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.35);
+  --shadow-xl: 0 24px 60px rgba(0,0,0,0.45);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.18);
+}

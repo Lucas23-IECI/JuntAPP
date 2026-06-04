@@ -1,0 +1,28 @@
+/* --- Print Setup --- */
+@media print {
+  body {
+    background-color: white;
+    color: black;
+  }
+  .demo-toolbar, .app-sidebar, .mobile-header, .sidebar-nav, .modal-footer, .modal-close {
+    display: none !important;
+  }
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+  .app-main-content {
+    padding: 0;
+  }
+  .modal {
+    position: static;
+    background: transparent;
+    display: block;
+    backdrop-filter: none;
+    padding: 0;
+  }
+  .modal-dialog {
+    border: none;
+    box-shadow: none;
+    max-width: 100%;
+  }
+}
