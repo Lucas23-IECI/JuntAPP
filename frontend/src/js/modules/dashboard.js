@@ -71,7 +71,8 @@ export const dashboardModule = {
             `;
             
             item.addEventListener("click", () => {
-              window.location.hash = "#comunicaciones";
+              window.history.pushState({ view: "comunicaciones" }, "", "/comunicaciones");
+              window.dispatchEvent(new PopStateEvent("popstate"));
             });
             announcementsPreviewContainer.appendChild(item);
           });
