@@ -13,6 +13,7 @@
   "author": "Lucas Méndez, Diego Guzmán, Sebastián Albornoz",
   "license": "MIT",
   "dependencies": {
-    "@supabase/supabase-js": "^2.106.2"
+    "@supabase/supabase-js": "^2.106.2",
+    "driver.js": "^1.4.0"
   }
 }
