@@ -89,7 +89,7 @@ export const notificationsModule = {
     }
 
     // Start background simulation
-    this.startRealTimeSimulator();
+    // this.startRealTimeSimulator();
 
     // Initial render
     this.render();
