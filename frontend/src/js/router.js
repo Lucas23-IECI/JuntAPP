@@ -43,7 +43,7 @@ export class Router {
 
   // Navegar actualizando la URL con History API
   navigate(viewName) {
-    const path = `/${viewName}`;
+    const path = viewName === "home" ? "/" : `/${viewName}`;
     if (window.location.pathname !== path) {
       window.history.pushState({ view: viewName }, "", path);
     }
@@ -61,13 +61,14 @@ export class Router {
     // Si no hay ruta o es raíz, determinar por defecto según el estado de sesión
     if (!viewName || viewName === "") {
       viewName = isLoggedOut ? "home" : "inicio";
-      window.history.replaceState({ view: viewName }, "", `/${viewName}`);
+      const path = viewName === "home" ? "/" : `/${viewName}`;
+      window.history.replaceState({ view: viewName }, "", path);
     }
 
     // Guardias de seguridad para ruteo
     if (isLoggedOut) {
       if (!publicRoutes.includes(viewName)) {
-        window.history.replaceState({ view: "home" }, "", "/home");
+        window.history.replaceState({ view: "home" }, "", "/");
         viewName = "home";
       }
     } else {
@@ -109,7 +110,8 @@ export class Router {
       // Actualizar clase active en enlaces superiores corporativos (desktop & mobile)
       document.querySelectorAll(".landing-nav-link, .mobile-nav-link").forEach(link => {
         const href = link.getAttribute("href");
-        if (href === `/${viewName}`) {
+        const matchPath = viewName === "home" ? "/" : `/${viewName}`;
+        if (href === matchPath) {
           link.classList.add("active");
         } else {
           link.classList.remove("active");

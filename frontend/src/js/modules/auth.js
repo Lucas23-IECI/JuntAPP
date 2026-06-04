@@ -237,10 +237,10 @@ export const authModule = {
     document.body.classList.add("logged-out");
     authOverlay.classList.remove("active");
     
-    // Only redirect to /home if we are on a private route (dashboard routes)
+    // Only redirect to / if we are on a private route (dashboard routes)
     const publicRoutes = ["", "/", "/home", "/caracteristicas", "/pricing", "/faq", "/sobre-nosotros", "/contacto"];
     if (!publicRoutes.includes(window.location.pathname)) {
-      window.history.replaceState({}, "", "/home");
+      window.history.replaceState({}, "", "/");
     }
     
     loginEmailInput.value = "";
