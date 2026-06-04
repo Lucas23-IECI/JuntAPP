@@ -5583,6 +5583,18 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
    Swiss Theme Overrides: Chalkboard, Subpages (Features, FAQ, Contact)
    ========================================================================== */
 
+/* Prevent horizontal overflow on mobile by allowing the inner flex wrapper to shrink */
+.style-swiss .widget-socio-item-mural > div:first-child {
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+  margin-right: 8px !important;
+}
+.style-swiss .widget-socio-item-mural .socio-avatar-mural {
+  flex-shrink: 0 !important;
+}
+
 /* Chalkboard Neighbors list details override to prevent app.css border/padding interference */
 .style-swiss .widget-socio-item-mural .socio-details {
   border-top: none !important;
