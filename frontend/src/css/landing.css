@@ -6978,3 +6978,96 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
 body.style-swiss:not(.logged-out) {
   zoom: 100% !important;
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS AND TEXT CONTRAST FIXES
+   ========================================================================== */
+
+/* 1. Chalkboard Card Contrast & Text Visibility */
+.style-swiss .bento-card-chalkboard strong,
+.style-swiss .bento-card-chalkboard p,
+.style-swiss .bento-card-chalkboard span,
+.style-swiss .bento-card-chalkboard li,
+.style-swiss .bento-card-chalkboard div {
+  color: #ffffff !important;
+}
+
+.style-swiss .bento-card-chalkboard .socio-rut {
+  color: #a3b899 !important;
+}
+
+.style-swiss .bento-card-chalkboard .feature-bullets-chalk li {
+  color: #a7f3d0 !important;
+}
+
+.style-swiss .bento-card-chalkboard .socio-status-badge.status-active {
+  color: #4ade80 !important;
+}
+
+.style-swiss .bento-card-chalkboard .socio-status-badge.status-pending {
+  color: #fb923c !important;
+}
+
+/* 2. Resumen de Caja - Header Text Contrast Fix */
+.style-swiss .mock-ui-header {
+  color: #031636 !important;
+}
+.style-swiss .mock-ui-header span {
+  color: #031636 !important;
+}
+.style-swiss .mock-ui-header span[style*="background"] {
+  color: #ffffff !important;
+}
+
+/* 3. Specs Section & Headers Mobile Alignment */
+.style-swiss .tech-specs-section-mural h3 {
+  color: #ffffff !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 950 !important;
+  text-shadow: 2px 2px 0px #031636 !important;
+  text-transform: uppercase !important;
+}
+
+@media (max-width: 768px) {
+  /* Reduce subpage corkboard container borders/paddings on mobile to prevent overflow */
+  .style-swiss .subpage-corkboard-container {
+    border-width: 10px !important;
+    padding: 30px 16px 30px 16px !important;
+  }
+
+  /* Force Specs Grid to stacked 1-column layout on mobile */
+  .style-swiss .specs-grid-mural {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  /* Responsive Headings to prevent viewport overflow */
+  .style-swiss h1,
+  .style-swiss .hero-title {
+    font-size: 2.2rem !important;
+  }
+  .style-swiss h2,
+  .style-swiss h3,
+  .style-swiss .section-title {
+    font-size: 1.55rem !important;
+  }
+  .style-swiss .tech-specs-section-mural h3 {
+    font-size: 1.55rem !important;
+  }
+  .style-swiss h4 {
+    font-size: 1.25rem !important;
+  }
+
+  /* Give more space inside the chalkboard list widget on mobile */
+  .style-swiss .bento-widget-column {
+    padding: 10px !important;
+  }
+  .style-swiss .mock-chalkboard-list-container {
+    padding: 12px 10px !important;
+  }
+  .style-swiss .widget-socio-item-mural {
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+}
+
