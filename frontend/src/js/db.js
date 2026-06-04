@@ -11,8 +11,14 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 let supabaseClient = null;
 let isCloudActive = false;
 
+console.log("🔍 debug - VITE_SUPABASE_URL:", supabaseUrl ? (supabaseUrl.startsWith("http") ? `Valid HTTP format (starts with ${supabaseUrl.substring(0, 15)}...)` : `INVALID format (starts with: ${supabaseUrl.substring(0, 15)}...)`) : "undefined/empty");
+console.log("🔍 debug - VITE_SUPABASE_ANON_KEY:", supabaseAnonKey ? `Starts with: ${supabaseAnonKey.substring(0, 15)}...` : "undefined/empty");
+
 if (supabaseUrl && supabaseAnonKey) {
   try {
+    if (!supabaseUrl.startsWith("http")) {
+      throw new Error(`supabaseUrl must start with http:// or https://. Current value starts with: "${supabaseUrl.substring(0, 15)}..."`);
+    }
     supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
     isCloudActive = true;
     console.log("☁️ JuntAPP connected to Supabase Cloud Database!");
