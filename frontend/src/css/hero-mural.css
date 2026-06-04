@@ -1,0 +1,762 @@
+   .style-swiss .hero-corkboard-container-v3 {
+  width: calc(100% - 40px) !important;
+  max-width: 1360px !important;
+  margin: 0 auto !important;
+  position: relative !important;
+  background-color: #cf9c58 !important;
+  background-image: 
+    radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 80%),
+    radial-gradient(rgba(0,0,0,0.15) 15%, transparent 16%), 
+    radial-gradient(rgba(0,0,0,0.15) 15%, transparent 16%) !important;
+  background-size: 100% 100%, 14px 14px, 14px 14px !important;
+  background-position: center, 0 0, 7px 7px !important;
+  border: 18px solid #4a2c11 !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 0 35px rgba(0,0,0,0.45), 0 25px 50px rgba(0,0,0,0.7) !important;
+  padding: 30px !important;
+  box-sizing: border-box !important;
+}
+
+/* Brass Plaque on the Top Wood frame */
+.style-swiss .corkboard-brass-plaque {
+  position: absolute !important;
+  top: -18px !important; /* centered on top wood border */
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important;
+  color: #031636 !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 950 !important;
+  font-size: 0.85rem !important;
+  padding: 6px 24px !important;
+  border: 2px solid #5a3c00 !important;
+  border-radius: 2px !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+  letter-spacing: 0.08em !important;
+  z-index: 100 !important;
+  text-shadow: 0px 1px 1px rgba(255,255,255,0.4) !important;
+  white-space: nowrap !important;
+}
+
+.style-swiss .corkboard-pins-layout-v3 {
+  position: relative !important;
+  width: 100% !important;
+  height: 680px !important; /* Expanded height */
+}
+
+/* Swing micro-animation keyframes */
+@keyframes noteSwing {
+  0% { transform: rotate(var(--orig-rot)); }
+  25% { transform: rotate(calc(var(--orig-rot) + 2deg)) scale(1.02); }
+  75% { transform: rotate(calc(var(--orig-rot) - 2deg)) scale(1.02); }
+  100% { transform: rotate(var(--orig-rot)); }
+}
+
+.style-swiss .cork-pin-note-v3, 
+.style-swiss .cork-polaroid-photo-v3, 
+.style-swiss .cork-handwritten-note {
+  position: absolute !important;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease, z-index 0.1s ease !important;
+  box-shadow: 0px 8px 18px rgba(0,0,0,0.18) !important;
+}
+
+.style-swiss .cork-pin-note-v3:hover, 
+.style-swiss .cork-polaroid-photo-v3:hover, 
+.style-swiss .cork-handwritten-note:hover {
+  animation: noteSwing 0.5s ease-in-out !important;
+  z-index: 50 !important;
+  box-shadow: 0px 15px 30px rgba(0,0,0,0.25) !important;
+}
+
+/* Specific note positions & properties */
+
+/* Center Main Note */
+.style-swiss .note-main-title-v3 {
+  --orig-rot: -1deg;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) rotate(var(--orig-rot)) !important;
+  width: 500px !important;
+  background-color: #ffffff !important;
+  border: 5px solid #031636 !important;
+  padding: 34px 28px !important;
+  z-index: 10 !important;
+  box-shadow: 0px 12px 28px rgba(0,0,0,0.3) !important;
+}
+.style-swiss .note-main-title-v3:hover {
+  transform: translate(-50%, -50%) scale(1.04) rotate(0deg) !important;
+  animation: none !important; /* Center note shouldn't swing wild to keep reading aligned */
+  box-shadow: 0px 20px 40px rgba(0,0,0,0.45) !important;
+}
+
+/* Top-Left: Asamblea General */
+.style-swiss .note-yellow-v3.note-top-left-v3 {
+  --orig-rot: -5deg;
+  top: 15px !important;
+  left: 10px !important;
+  width: 230px !important;
+  transform: rotate(var(--orig-rot)) !important;
+  z-index: 5 !important;
+  background-color: #fffbeb !important;
+  background-image: linear-gradient(rgba(3, 22, 54, 0.05) 1px, transparent 1px) !important;
+  background-size: 100% 20px !important;
+  border: 3px solid #031636 !important;
+  border-left: 6px double rgba(220, 38, 38, 0.35) !important;
+  padding: 16px 16px 16px 20px !important;
+  box-shadow: 3px 5px 12px rgba(0,0,0,0.12) !important;
+  border-radius: 1px 2px 2px 1px / 2px 1px 3px 2px !important;
+}
+
+/* Bottom-Left (Zumba) - Fills the void! */
+.style-swiss .note-yellow-v3.note-bottom-left-note-v3 {
+  --orig-rot: 4deg;
+  bottom: 20px !important;
+  left: 15px !important;
+  width: 230px !important;
+  transform: rotate(var(--orig-rot)) !important;
+  z-index: 5 !important;
+  background-color: #fffdf0 !important;
+  border: 3.5px solid #031636 !important;
+  padding: 16px !important;
+}
+
+/* Top-Right: Calendario Junio */
+.style-swiss .note-calendar-v3.note-top-right-v3 {
+  --orig-rot: 5deg;
+  top: 15px !important;
+  right: 10px !important;
+  width: 235px !important;
+  transform: rotate(var(--orig-rot)) !important;
+  z-index: 5 !important;
+  background-color: #fef8f0 !important;
+  background-image: 
+    linear-gradient(rgba(3, 22, 54, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(3, 22, 54, 0.04) 1px, transparent 1px) !important;
+  background-size: 14px 14px !important;
+  border: 3.5px solid #031636 !important;
+  padding: 16px !important;
+  box-shadow: 3px 6px 14px rgba(0,0,0,0.15) !important;
+  border-radius: 2px 2px 3px 1px / 1px 3px 2px 2px !important;
+}
+
+/* Coffee Stain Detail on Calendar */
+.style-swiss .coffee-stain {
+  position: absolute !important;
+  top: -15px !important;
+  right: -15px !important;
+  width: 75px !important;
+  height: 75px !important;
+  border: 4px solid rgba(139, 92, 26, 0.14) !important;
+  border-radius: 50% !important;
+  pointer-events: none !important;
+  z-index: 99 !important;
+}
+.style-swiss .coffee-stain::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 6px; left: 6px; right: 6px; bottom: 6px !important;
+  border: 2px solid rgba(139, 92, 26, 0.08) !important;
+  border-radius: 50% !important;
+}
+
+/* Bottom-Right: Corte Agua */
+.style-swiss .note-orange-v3.note-bottom-right-v3 {
+  --orig-rot: -4deg;
+  bottom: 20px !important;
+  right: 15px !important;
+  width: 230px !important;
+  transform: rotate(var(--orig-rot)) !important;
+  z-index: 5 !important;
+  background-color: #fff7ed !important;
+  background-image: 
+    linear-gradient(rgba(251, 146, 60, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(251, 146, 60, 0.08) 1px, transparent 1px) !important;
+  background-size: 15px 15px !important;
+  border: 3.5px solid #ff6b00 !important;
+  padding: 16px !important;
+  box-shadow: 4px 6px 15px rgba(0,0,0,0.13) !important;
+  border-radius: 2px 2px 1px 3px / 3px 1px 2px 2px !important;
+}
+
+/* Left-Center: Handwritten checklist (Tareas Sede) */
+.style-swiss .cork-handwritten-note {
+  --orig-rot: -6deg;
+  top: 310px !important;
+  left: 6px !important;
+  width: 210px !important;
+  background-color: #fcfbf4 !important;
+  background-image: linear-gradient(rgba(120, 113, 108, 0.1) 1px, transparent 1px) !important;
+  background-size: 100% 22px !important;
+  border: 2.5px solid #78716c !important;
+  border-left: 5px double rgba(220, 38, 38, 0.25) !important;
+  padding: 24px 16px 16px 24px !important;
+  transform: rotate(var(--orig-rot)) !important;
+  font-family: 'Caveat', cursive, sans-serif !important;
+  color: #1c1917 !important;
+  z-index: 6 !important;
+  box-shadow: 2px 6px 14px rgba(0,0,0,0.15) !important;
+  border-radius: 2px 1px 3px 2px / 1px 3px 2px 4px !important;
+}
+.style-swiss .note-handwritten-tag {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  border-bottom: 2px dashed #78716c !important;
+  display: block !important;
+  text-align: center !important;
+  padding-bottom: 4px !important;
+  margin-bottom: 8px !important;
+}
+.style-swiss .note-handwritten-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 1.15rem !important;
+  line-height: 1.35 !important;
+}
+.style-swiss .note-handwritten-list li {
+  padding-left: 18px !important;
+  position: relative !important;
+  margin-bottom: 4px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+}
+.style-swiss .note-handwritten-list li::before {
+  content: "☐" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: -1px !important;
+  color: #78716c !important;
+}
+.style-swiss .note-handwritten-list li.checked {
+  text-decoration: line-through !important;
+  color: #78716c !important;
+}
+.style-swiss .note-handwritten-list li.checked::before {
+  content: "☑" !important;
+  color: #16a34a !important;
+}
+
+/* Masking Tape effect */
+.style-swiss .tape-holder {
+  position: absolute !important;
+  width: 50px !important;
+  height: 16px !important;
+  background-color: rgba(234, 179, 8, 0.28) !important; /* semi-transparent yellow tape */
+  box-shadow: 0px 1px 2px rgba(0,0,0,0.05) !important;
+  backdrop-filter: blur(1px) !important;
+  pointer-events: none !important;
+}
+.style-swiss .tape-top-left {
+  top: -8px !important;
+  left: -12px !important;
+  transform: rotate(-35deg) !important;
+}
+.style-swiss .tape-top-right {
+  top: -8px !important;
+  right: -12px !important;
+  transform: rotate(35deg) !important;
+}
+
+/* Polaroid 1 (Left-Center floating further left) */
+.style-swiss .polaroid-1-v3 {
+  --orig-rot: -12deg;
+  bottom: 200px !important;
+  left: -25px !important;
+  width: 175px !important;
+  transform: rotate(var(--orig-rot)) !important;
+  z-index: 6 !important;
+}
+
+/* Polaroid 2 (Below the calendar on the right side) */
+.style-swiss .polaroid-2-v3 {
+  --orig-rot: 9deg;
+  top: 320px !important;
+  right: 40px !important;
+  width: 175px !important;
+  transform: rotate(var(--orig-rot)) !important;
+  z-index: 6 !important;
+}
+
+/* Handwritten captions for polaroids */
+.style-swiss .polaroid-caption-v3 {
+  font-family: 'Caveat', cursive, sans-serif !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  margin-top: 6px !important;
+  color: #1c1917 !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+}
+
+/* Polaroid styling */
+.style-swiss .cork-polaroid-photo-v3 {
+  background-color: #ffffff !important;
+  border: 3px solid #031636 !important;
+  padding: 10px 10px 20px 10px !important;
+}
+.style-swiss .cork-polaroid-photo-v3::before {
+  display: none !important; /* Hide tape from polaroid since it has pushpin */
+}
+.style-swiss .polaroid-image-placeholder-v3 {
+  height: 110px !important;
+  border: 2px solid #031636 !important;
+}
+
+.style-swiss .note-title-big-v3 {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 950 !important;
+  font-size: 2.7rem !important;
+  color: #031636 !important;
+  line-height: 1.12 !important;
+  margin-top: 10px !important;
+  margin-bottom: 14px !important;
+}
+
+.style-swiss .note-desc-big-v3 {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+  line-height: 1.45 !important;
+  margin: 0 !important;
+}
+
+/* Calendar Note specific */
+.style-swiss .sim-calendar-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 4px !important;
+  margin-top: 10px !important;
+  font-family: monospace !important;
+  font-size: 0.65rem !important;
+  text-align: center !important;
+  color: #031636 !important;
+}
+.style-swiss .sim-calendar-grid div {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 1px auto !important;
+  box-sizing: border-box !important;
+  color: #031636 !important;
+  font-weight: 700 !important;
+  font-size: 0.7rem !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: transform 0.2s, background-color 0.2s, color 0.2s !important;
+}
+.style-swiss .sim-calendar-grid div.cal-day-header,
+.style-swiss .sim-calendar-grid div.cal-empty-day {
+  cursor: default !important;
+}
+.style-swiss .sim-calendar-grid div:hover:not(.cal-day-header):not(.cal-empty-day) {
+  transform: scale(1.15) !important;
+  background-color: rgba(3, 22, 54, 0.08) !important;
+  border-radius: 50% !important;
+}
+.style-swiss .sim-calendar-grid div.active-day {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  font-weight: 900 !important;
+}
+.style-swiss .cal-day-header {
+  font-weight: 900 !important;
+  color: #031636 !important;
+  border-bottom: 1px solid #cbd5e1 !important;
+  padding-bottom: 2px !important;
+}
+.style-swiss .cal-event-day {
+  border-radius: 50% !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  width: 22px !important;
+  height: 22px !important;
+}
+.style-swiss .cal-event-day.green-event { background: #16a34a !important; }
+.style-swiss .cal-event-day.orange-event { background: #ff6b00 !important; }
+.style-swiss .cal-event-day.blue-event { background: #0077cc !important; }
+
+.style-swiss .note-tag-v3 {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 0.65rem !important;
+  text-transform: uppercase !important;
+  border: 2px solid #031636 !important;
+  padding: 2px 6px !important;
+  display: inline-block !important;
+  margin-bottom: 8px !important;
+  background-color: #031636 !important;
+  color: #ffffff !important;
+}
+
+.style-swiss .note-tag-v3.font-headline-v3 {
+  background-color: #ff6b00 !important;
+  color: #ffffff !important;
+}
+
+.style-swiss .cork-pin-note-v3 strong {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 1.05rem !important;
+  color: #031636 !important;
+  display: block !important;
+  margin-top: 4px !important;
+}
+
+.style-swiss .cork-pin-note-v3 p {
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+  margin: 6px 0 0 0 !important;
+  line-height: 1.4 !important;
+}
+
+/* Simulated chincheta / pin with plastic head + shadow */
+.style-swiss .pin-marker {
+  position: absolute !important;
+  top: -12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.35), inset -2px -2px 4px rgba(0,0,0,0.4) !important;
+  z-index: 100 !important;
+}
+.style-swiss .pin-marker::after {
+  content: '' !important;
+  position: absolute !important;
+  width: 2px !important;
+  height: 10px !important;
+  background: #78716c !important;
+  left: 7px !important;
+  top: 14px !important;
+  box-shadow: 2px 2px 2px rgba(0,0,0,0.4) !important;
+}
+.style-swiss .red-pin { background-color: #dc2626 !important; }
+.style-swiss .blue-pin { background-color: #2563eb !important; }
+.style-swiss .green-pin { background-color: #16a34a !important; }
+.style-swiss .yellow-pin { background-color: #eab308 !important; }
+.style-swiss .pink-pin { background-color: #ec4899 !important; }
+
+/* Polaroid simulated photo content */
+.style-swiss .polaroid-image-placeholder-v3 {
+  width: 100% !important;
+  background-color: #cbd5e1 !important;
+  border: 2px solid #031636 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.style-swiss .simulated-polaroid-content {
+  position: absolute !important;
+  top: 0; left: 0; right: 0; bottom: 0 !important;
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 60%, #15803d 60%, #166534 100%) !important;
+}
+
+.style-swiss .simulated-polaroid-content::before {
+  content: "" !important;
+  position: absolute !important;
+  width: 30px !important;
+  height: 30px !important;
+  background: #fef08a !important;
+  border-radius: 50% !important;
+  top: 15px !important;
+  left: 20px !important;
+}
+
+
+/* Slide 2: Cork Board Large Notice Paper Sheet (Creative notices) */
+.style-swiss .cork-paper-sheet-v3 {
+  --orig-rot: -0.5deg;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) rotate(var(--orig-rot)) !important;
+  width: 690px !important;
+  height: 460px !important;
+  z-index: 10 !important;
+  background-color: #ffffff !important;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 0) !important;
+  background-size: 16px 16px !important;
+  border: 4px double #ff6b00 !important;
+  outline: 3px solid #031636 !important;
+  padding: 46px 42px !important;
+  box-shadow: 12px 12px 0px rgba(3, 22, 54, 0.9), 0px 10px 25px rgba(0, 0, 0, 0.2) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease !important;
+}
+.style-swiss .cork-paper-sheet-v3:hover {
+  transform: translate(-50%, -50%) scale(1.03) rotate(0deg) !important;
+  box-shadow: 16px 16px 0px rgba(3, 22, 54, 0.95), 0px 15px 35px rgba(0, 0, 0, 0.25) !important;
+}
+.style-swiss .cork-paper-sheet-v3 .note-tag-v3 {
+  font-size: 0.75rem !important;
+  padding: 3px 8px !important;
+  margin-bottom: 10px !important;
+  align-self: flex-start !important;
+}
+.style-swiss .cork-paper-sheet-v3 .note-title-big-v3 {
+  font-size: 2.95rem !important;
+  line-height: 1.15 !important;
+  margin-top: 8px !important;
+  margin-bottom: 15px !important;
+}
+.style-swiss .cork-paper-sheet-v3 .note-desc-big-v3 {
+  font-size: 1.22rem !important;
+  line-height: 1.45 !important;
+}
+.style-swiss .cork-paper-sheet-v3 button.btn-open-auth {
+  font-size: 1.15rem !important;
+  padding: 12px 24px !important;
+  margin-top: 20px !important;
+  align-self: flex-start !important;
+}
+
+/* Red pencil strikeout style for handwritten checklist */
+.style-swiss .note-handwritten-list li.checked {
+  text-decoration: none !important;
+  position: relative !important;
+}
+.style-swiss .note-handwritten-list li.checked::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 18px !important;
+  right: 0 !important;
+  top: 50% !important;
+  height: 3px !important;
+  background: rgba(220, 38, 38, 0.7) !important;
+  transform: translateY(-50%) rotate(-1.5deg) !important;
+  border-radius: 1px !important;
+}
+
+/* Red circle marker animation for calendar days */
+.style-swiss .sim-calendar-grid div.circled {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50,10 C25,12 12,35 15,60 C18,85 45,92 70,85 C90,80 92,50 85,30 C78,10 40,5 30,20' fill='none' stroke='%23dc2626' stroke-width='8' stroke-linecap='round' stroke-dasharray='300' stroke-dashoffset='0'/></svg>") no-repeat center !important;
+  background-size: 110% 110% !important;
+  color: #dc2626 !important;
+  font-weight: 900 !important;
+  transform: scale(1.1) rotate(-3deg) !important;
+}
+
+/* Pinned Note Gravity Falling Animations */
+@keyframes noteFallDown {
+  0% {
+    transform: rotate(var(--orig-rot)) translateY(0);
+    opacity: 1;
+  }
+  15% {
+    transform: rotate(calc(var(--orig-rot) + 8deg)) translateY(20px);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(calc(var(--orig-rot) + 40deg)) translateY(1000px);
+    opacity: 0;
+  }
+}
+
+@keyframes centerNoteFallDown {
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--orig-rot));
+    opacity: 1;
+  }
+  15% {
+    transform: translate(-50%, -48%) rotate(calc(var(--orig-rot) + 5deg));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 150%) rotate(calc(var(--orig-rot) + 30deg));
+    opacity: 0;
+  }
+}
+
+.style-swiss .cork-pin-note-v3.fallen-note,
+.style-swiss .cork-polaroid-photo-v3.fallen-note,
+.style-swiss .cork-handwritten-note.fallen-note {
+  animation: noteFallDown 1s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards !important;
+  pointer-events: none !important;
+}
+
+.style-swiss .cork-paper-sheet-v3.fallen-note {
+  animation: centerNoteFallDown 1s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards !important;
+  pointer-events: none !important;
+}
+
+/* Dangling states for double-taped note */
+.style-swiss .cork-handwritten-note.dangling-left {
+  transform-origin: top left !important;
+  transform: rotate(-35deg) translate(0, 20px) !important;
+  animation: noteSwingDangleLeft 2s ease-in-out infinite alternate !important;
+}
+.style-swiss .cork-handwritten-note.dangling-right {
+  transform-origin: top right !important;
+  transform: rotate(35deg) translate(0, 20px) !important;
+  animation: noteSwingDangleRight 2s ease-in-out infinite alternate !important;
+}
+
+@keyframes noteSwingDangleLeft {
+  0% { transform: rotate(-35deg) translate(0, 20px); }
+  100% { transform: rotate(-25deg) translate(0, 20px); }
+}
+@keyframes noteSwingDangleRight {
+  0% { transform: rotate(35deg) translate(0, 20px); }
+  100% { transform: rotate(25deg) translate(0, 20px); }
+}
+
+/* Interactive Pin and Tape cursors */
+.style-swiss .pin-marker,
+.style-swiss .tape-holder {
+  cursor: pointer !important;
+  transition: transform 0.2s, opacity 0.2s !important;
+}
+.style-swiss .pin-marker:hover {
+  transform: translateX(-50%) scale(1.2) rotate(15deg) !important;
+}
+.style-swiss .tape-holder:hover {
+  transform: scale(1.1) !important;
+  filter: brightness(1.1) !important;
+}
+
+/* Integrated Calendar Event Callout */
+.style-swiss .calendar-event-callout {
+  margin-top: 12px !important;
+  padding: 10px 0 0 0 !important;
+  border-top: 2px dashed #031636 !important;
+  font-family: 'Caveat', cursive, sans-serif !important;
+  font-size: 1.15rem !important;
+  line-height: 1.35 !important;
+  color: #dc2626 !important; /* Red pen look! */
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.style-swiss .calendar-event-callout.active {
+  opacity: 1 !important;
+  max-height: 150px !important;
+}
+.style-swiss .calendar-event-callout strong {
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  text-decoration: underline !important;
+  display: inline-block !important;
+  margin-bottom: 4px !important;
+  color: #b91c1c !important;
+}
+
+/* Handwritten Completed Stamp for Tareas Sede */
+.style-swiss .tasks-completed-stamp {
+  font-family: 'Caveat', cursive, sans-serif !important;
+  color: #16a34a !important;
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  margin-top: 15px !important;
+  border: 3px double #16a34a !important;
+  padding: 4px !important;
+  transform: rotate(-5deg) scale(0.9) !important;
+  opacity: 0;
+  display: none;
+  transition: all 0.3s ease !important;
+  border-radius: 4px !important;
+}
+.style-swiss .tasks-completed-stamp.active {
+  display: block !important;
+  opacity: 1 !important;
+  transform: rotate(-5deg) scale(1.05) !important;
+}
+
+/* Small floating restore button in the bottom-right corner */
+.style-swiss .restore-mural-btn {
+  position: absolute !important;
+  bottom: 10px !important;
+  right: 10px !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  font-size: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 200 !important;
+  background: rgba(3, 22, 54, 0.8) !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important;
+  transition: all 0.25s ease !important;
+}
+.style-swiss .restore-mural-btn:hover {
+  background: #ff6b00 !important;
+  transform: scale(1.1) rotate(180deg) !important;
+}
+
+/* Responsive collapse for Mural slide below 900px */
+@media (max-width: 900px) {
+  .style-swiss .hero-corkboard-container-v3 {
+    border: 12px solid #4a2c11 !important;
+    padding: 20px !important;
+    max-width: 100% !important;
+  }
+  .style-swiss .corkboard-pins-layout-v3 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    height: auto !important;
+  }
+  .style-swiss .cork-paper-sheet-v3,
+  .style-swiss .note-main-title-v3,
+  .style-swiss .note-yellow-v3.note-top-left-v3,
+  .style-swiss .note-calendar-v3.note-top-right-v3,
+  .style-swiss .polaroid-1-v3,
+  .style-swiss .note-orange-v3.note-bottom-right-v3,
+  .style-swiss .polaroid-2-v3,
+  .style-swiss .note-yellow-v3.note-bottom-left-note-v3,
+  .style-swiss .cork-handwritten-note {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    max-width: 100% !important;
+  }
+  .style-swiss .cork-paper-sheet-v3 {
+    grid-column: 1 / -1 !important;
+    padding: 30px !important;
+  }
+  .style-swiss .cork-paper-sheet-v3 .note-title-big-v3 {
+    font-size: 2.2rem !important;
+    margin-top: 10px !important;
+    margin-bottom: 14px !important;
+  }
+  .style-swiss .cork-paper-sheet-v3 .note-desc-big-v3 {
+    font-size: 1rem !important;
+  }
+  .style-swiss .cork-paper-sheet-v3 button.btn-open-auth {
+    font-size: 1.1rem !important;
+    padding: 12px 24px !important;
+    margin-top: 16px !important;
+  }
+  .style-swiss .note-main-title-v3 {
+    grid-column: 1 / -1 !important;
+  }
+  .style-swiss .corkboard-brass-plaque {
+    top: -12px !important;
+  }
+}
+@media (max-width: 600px) {
+  .style-swiss .corkboard-pins-layout-v3 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+
