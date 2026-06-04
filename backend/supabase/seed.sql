@@ -36,13 +36,13 @@ VALUES
 -- 4. Seed Polls
 INSERT INTO public.polls (id, title, description, active, options)
 VALUES 
-('poll-fondeve-2026', 'Consulta: Prioridad de Inversión FONDEVE 2026', 'Este año postularemos al Fondo de Desarrollo Vecinal municipal (FONDEVE). ¿Cuál de las propuestas considera prioritaria?', true, '[{"id": "opt-1", "text": "Cámaras de Seguridad Vecinal HD"}, {"id": "opt-2", "text": "Repavimentación de pasajes interiores"}, {"id": "opt-3", "text": "Luminarias LED ornamentales para la plaza"}]'::jsonb);
+('d5089e9f-9694-4d87-8d26-384196c80009', 'Consulta: Prioridad de Inversión FONDEVE 2026', 'Este año postularemos al Fondo de Desarrollo Vecinal municipal (FONDEVE). ¿Cuál de las propuestas considera prioritaria?', true, '[{"id": "opt-1", "text": "Cámaras de Seguridad Vecinal HD"}, {"id": "opt-2", "text": "Repavimentación de pasajes interiores"}, {"id": "opt-3", "text": "Luminarias LED ornamentales para la plaza"}]'::jsonb);
 
 -- 5. Seed Votes
 INSERT INTO public.votes (user_id, poll_id, option_id)
 VALUES 
-('d5089e9f-9694-4d87-8d26-384196c80003', 'poll-fondeve-2026', 'opt-1'),
-('d5089e9f-9694-4d87-8d26-384196c80004', 'poll-fondeve-2026', 'opt-3');
+('d5089e9f-9694-4d87-8d26-384196c80003', 'd5089e9f-9694-4d87-8d26-384196c80009', 'opt-1'),
+('d5089e9f-9694-4d87-8d26-384196c80004', 'd5089e9f-9694-4d87-8d26-384196c80009', 'opt-3');
 
 -- 6. Seed Announcements
 INSERT INTO public.announcements (category, title, content, date, author)
