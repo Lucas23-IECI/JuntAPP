@@ -44,6 +44,36 @@ export const authModule = {
     tabLoginBtn.addEventListener("click", () => this.switchTab("login"));
     tabRegisterBtn.addEventListener("click", () => this.switchTab("register"));
 
+    // 1b. Bind landing page open buttons
+    document.querySelectorAll(".btn-open-auth").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tab = btn.getAttribute("data-tab");
+        authOverlay.classList.add("active");
+        this.switchTab(tab);
+        
+        // Cierra menu movil si esta abierto
+        const mobileMenu = document.getElementById("mobileNavMenu");
+        const toggleBtn = document.getElementById("mobileNavToggleBtn");
+        if (mobileMenu) mobileMenu.classList.remove("open");
+        if (toggleBtn) toggleBtn.classList.remove("open");
+      });
+    });
+
+    // 1c. Bind close button inside auth card
+    const closeAuthBtn = document.getElementById("closeAuthBtn");
+    if (closeAuthBtn) {
+      closeAuthBtn.addEventListener("click", () => {
+        authOverlay.classList.remove("active");
+      });
+    }
+
+    // 1d. Click outside auth card to close
+    authOverlay.addEventListener("click", (e) => {
+      if (e.target === authOverlay) {
+        authOverlay.classList.remove("active");
+      }
+    });
+
     // 2. Chilean RUT real-time validation in register form
     regRutInput.addEventListener("input", (e) => {
       const val = e.target.value;
@@ -191,19 +221,27 @@ export const authModule = {
     authOverlay.classList.remove("active");
 
     if (user.role === "dirigente") {
-      document.body.className = "role-dirigente";
+      document.body.classList.add("role-dirigente");
+      document.body.classList.remove("role-vecino");
     } else {
-      document.body.className = "role-vecino";
+      document.body.classList.add("role-vecino");
+      document.body.classList.remove("role-dirigente");
     }
 
     // Trigger router layout refreshes
-    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    window.dispatchEvent(new PopStateEvent("popstate"));
   },
 
   clearSession() {
     this.currentUser = null;
     document.body.classList.add("logged-out");
-    authOverlay.classList.add("active");
+    authOverlay.classList.remove("active");
+    
+    // Only redirect to /home if we are on a private route (dashboard routes)
+    const publicRoutes = ["", "/", "/home", "/caracteristicas", "/pricing", "/faq", "/sobre-nosotros", "/contacto"];
+    if (!publicRoutes.includes(window.location.pathname)) {
+      window.history.replaceState({}, "", "/home");
+    }
     
     loginEmailInput.value = "";
     loginPasswordInput.value = "";
