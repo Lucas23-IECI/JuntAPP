@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Icono maskable de JuntAPP">
+  <rect width="1024" height="1024" fill="#031636"/>
+  <g transform="translate(102.4 102.4) scale(.8)">
+    <path fill="#fff" d="M548 252h170v342c0 166-94 252-244 252-120 0-198-50-234-150l162-42c18 46 45 66 93 66 60 0 89-38 89-108V252Z"/>
+    <rect x="240" y="638" width="132" height="132" fill="#ff6b00"/>
+  </g>
+</svg>

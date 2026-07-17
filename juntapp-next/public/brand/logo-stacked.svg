@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1300" role="img" aria-labelledby="title">
+  <title id="title">JuntAPP</title>
+  <rect x="96" y="48" width="832" height="832" rx="164" fill="#031636"/>
+  <g transform="translate(0 -18)">
+    <path fill="#fff" d="M548 252h170v342c0 166-94 252-244 252-120 0-198-50-234-150l162-42c18 46 45 66 93 66 60 0 89-38 89-108V252Z"/>
+    <rect x="240" y="638" width="132" height="132" fill="#ff6b00"/>
+  </g>
+  <text x="512" y="1130" text-anchor="middle" fill="#031636" font-family="Arial, Helvetica, sans-serif" font-size="230" font-weight="800" letter-spacing="-12">Junt<tspan fill="#ff6b00">APP</tspan></text>
+</svg>

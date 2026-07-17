@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar';
 import './globals.css';
 import '@/styles/original/style.css';
@@ -8,6 +8,37 @@ export const metadata: Metadata = {
   title: 'JuntAPP — Gestión Vecinal Digital',
   description: 'Plataforma digital para la gestión y transparencia de Juntas de Vecinos en Chile.',
   keywords: ['junta de vecinos', 'chile', 'gestión vecinal', 'transparencia', 'votaciones'],
+  applicationName: 'JuntAPP',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'JuntAPP',
+  },
+  icons: {
+    icon: [
+      { url: '/brand/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: [
+      { url: '/icons/apple/apple-touch-icon-180.png', sizes: '180x180', type: 'image/png' },
+      { url: '/icons/apple/apple-touch-icon-167.png', sizes: '167x167', type: 'image/png' },
+      { url: '/icons/apple/apple-touch-icon-152.png', sizes: '152x152', type: 'image/png' },
+      { url: '/icons/apple/apple-touch-icon-120.png', sizes: '120x120', type: 'image/png' },
+    ],
+    other: [{ rel: 'mask-icon', url: '/brand/safari-pinned-tab.svg', color: '#031636' }],
+  },
+  other: {
+    'msapplication-config': '/browserconfig.xml',
+    'msapplication-TileColor': '#031636',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#031636',
+  colorScheme: 'light dark',
 };
 
 export default function RootLayout({

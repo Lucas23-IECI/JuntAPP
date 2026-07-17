@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "JuntAPP — Gestión Vecinal Digital",
+  "short_name": "JuntAPP",
+  "description": "Gestión, transparencia y participación para juntas de vecinos en Chile.",
+  "lang": "es-CL",
+  "start_url": "/inicio",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#031636",
+  "icons": [
+    { "src": "/icons/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/pwa/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/pwa/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
