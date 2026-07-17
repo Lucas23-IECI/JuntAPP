@@ -8,7 +8,7 @@ import { CHILE_REGIONS, getCommunes, isValidChileLocation } from '@/lib/chile-lo
 
 type Step = 'account' | 'junta';
 
-export default function RegisterForm() {
+export default function RegisterForm({ initialInviteCode = '' }: { initialInviteCode?: string }) {
   const [step, setStep] = useState<Step>('account');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,7 +29,7 @@ export default function RegisterForm() {
   const [juntaName, setJuntaName] = useState('');
   const [juntaRegion, setJuntaRegion] = useState('');
   const [juntaComuna, setJuntaComuna] = useState('');
-  const [inviteCode, setInviteCode] = useState('');
+  const [inviteCode, setInviteCode] = useState(/^[A-Z0-9]{6}$/.test(initialInviteCode) ? initialInviteCode : '');
 
   function handleRutChange(value: string) {
     const clean = cleanRUT(value);
@@ -71,6 +71,18 @@ export default function RegisterForm() {
       if (juntaAction === 'create' && !isValidChileLocation(juntaRegion, juntaComuna)) {
         throw new Error('Selecciona una región y comuna válidas.');
       }
+      const validationResponse = await fetch('/api/registration/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          rut: cleanRUT(rut),
+          juntaAction,
+          inviteCode: juntaAction === 'join' ? inviteCode.toUpperCase().trim() : undefined,
+        }),
+      });
+      const validation = await validationResponse.json();
+      if (!validationResponse.ok) throw new Error(validation.error ?? 'No fue posible validar el registro.');
       const supabase = createClient();
 
       // Junta creation/joining is handled atomically by the database trigger.

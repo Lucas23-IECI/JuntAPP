@@ -4,6 +4,7 @@ import OriginalAuthFrame from '@/components/auth/OriginalAuthFrame';
 
 export const metadata: Metadata = { title: 'Registro — JuntAPP' };
 
-export default function RegistroPage() {
-  return <OriginalAuthFrame active="register"><RegisterForm /></OriginalAuthFrame>;
+export default async function RegistroPage({ searchParams }: { searchParams: Promise<{ codigo?: string }> }) {
+  const code = (await searchParams).codigo?.trim().toUpperCase() ?? '';
+  return <OriginalAuthFrame active="register"><RegisterForm initialInviteCode={code} /></OriginalAuthFrame>;
 }

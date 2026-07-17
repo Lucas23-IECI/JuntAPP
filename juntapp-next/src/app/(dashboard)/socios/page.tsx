@@ -22,11 +22,21 @@ export default async function SociosPage() {
     .eq('junta_id', profile?.junta_id)
     .order('name', { ascending: true });
 
+  const period = `${new Date().toISOString().slice(0, 7)}-01`;
+  const { data: mercadoPagoDues } = await supabase
+    .from('member_dues')
+    .select('profile_id')
+    .eq('junta_id', profile?.junta_id)
+    .eq('period', period)
+    .eq('status', 'paid')
+    .not('mercadopago_payment_id', 'is', null);
+
   return (
     <SociosClient
       socios={socios || []}
       currentProfile={profile!}
       junta={(Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas)!}
+      paidByMercadoPagoIds={(mercadoPagoDues ?? []).map((due) => due.profile_id)}
     />
   );
 }

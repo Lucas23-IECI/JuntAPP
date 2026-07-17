@@ -24,6 +24,7 @@ export interface Junta {
   subscription_next_payment_date: string | null;
   subscription_last_payment_status: string | null;
   subscription_last_synced_at: string | null;
+  monthly_due_amount: number;
   activated_at: string | null;
   created_at: string;
 }
@@ -106,4 +107,32 @@ export interface TreasuryDocument {
   size: number;
   created_at: string | null;
   signedUrl: string | null;
+}
+
+export type MemberDueStatus = 'pending' | 'preference_created' | 'paid' | 'rejected' | 'refunded';
+
+export interface MemberDue {
+  id: string;
+  junta_id: string;
+  profile_id: string;
+  period: string;
+  amount: number;
+  status: MemberDueStatus;
+  mercadopago_preference_id: string | null;
+  mercadopago_payment_id: string | null;
+  checkout_url: string | null;
+  paid_at: string | null;
+  transaction_id: number | null;
+  refund_transaction_id: number | null;
+  payment_source: 'mercadopago' | 'manual' | null;
+  manual_payment_method: 'cash' | 'transfer' | 'other' | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MercadoPagoConnectionSummary {
+  connected: boolean;
+  mercadoPagoUserId: number | null;
+  connectedAt: string | null;
+  oauthConfigured: boolean;
 }

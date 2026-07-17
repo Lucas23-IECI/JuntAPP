@@ -1,18 +1,20 @@
 import { createClient } from '@/lib/supabase/server';
 import type { Metadata } from 'next';
 import TesoreriaClient from '@/components/dashboard/tesoreria/TesoreriaClient';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { mercadoPagoConnectConfigured } from '@/lib/mercadopago-connect';
 
 export const metadata: Metadata = {
   title: 'Tesorería — JuntAPP',
 };
 
-export default async function TesoreriaPage() {
+export default async function TesoreriaPage({ searchParams }: { searchParams: Promise<{ cuota?: string; mercadopago?: string }> }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('*, juntas(*)')
     .eq('id', user!.id)
     .single();
 
@@ -21,6 +23,21 @@ export default async function TesoreriaPage() {
     .select('*')
     .eq('junta_id', profile?.junta_id)
     .order('date', { ascending: false });
+
+  const junta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
+  const period = `${new Date().toISOString().slice(0, 7)}-01`;
+  const { data: currentDue } = await supabase
+    .from('member_dues')
+    .select('*')
+    .eq('profile_id', user!.id)
+    .eq('period', period)
+    .maybeSingle();
+  const { data: mercadoPagoAccount } = profile ? await createAdminClient()
+    .from('mercadopago_junta_accounts')
+    .select('mercadopago_user_id, connected_at')
+    .eq('junta_id', profile.junta_id)
+    .maybeSingle() : { data: null };
+  const params = await searchParams;
 
   const { data: memberStatuses } = await supabase
     .from('profiles')
@@ -48,6 +65,16 @@ export default async function TesoreriaPage() {
       transactions={transactions || []}
       documents={documents}
       currentProfile={profile!}
+      junta={junta!}
+      currentDue={currentDue ?? null}
+      paymentReturn={params.cuota ?? null}
+      connectionReturn={params.mercadopago ?? null}
+      mercadoPagoConnection={{
+        connected: Boolean(mercadoPagoAccount),
+        mercadoPagoUserId: mercadoPagoAccount?.mercadopago_user_id ?? null,
+        connectedAt: mercadoPagoAccount?.connected_at ?? null,
+        oauthConfigured: mercadoPagoConnectConfigured(),
+      }}
       totalMembers={memberStatuses?.length ?? 0}
       paidMembers={memberStatuses?.filter((member) => member.cuota_status === 'al_dia').length ?? 0}
     />

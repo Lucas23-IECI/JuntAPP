@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getMercadoPagoAuthorizedPayment, syncMercadoPagoSubscription } from '@/lib/mercadopago';
+import { processMemberDuePayment } from '@/lib/member-dues';
 
 function validSignature(request: Request, dataId: string) {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
@@ -27,15 +28,19 @@ async function recordEvent(eventId: string, juntaId: string, payload: unknown) {
 
 export async function POST(request: Request) {
   const url = new URL(request.url);
-  const body = await request.json().catch(() => null) as { type?: string; action?: string; data?: { id?: string | number } } | null;
+  const body = await request.json().catch(() => null) as { type?: string; action?: string; user_id?: string | number; data?: { id?: string | number } } | null;
   const dataId = String(url.searchParams.get('data.id') ?? body?.data?.id ?? '');
   const type = String(url.searchParams.get('type') ?? body?.type ?? '');
-  if (!dataId || !['subscription_preapproval', 'subscription_authorized_payment'].includes(type)) {
+  if (!dataId || !['payment', 'subscription_preapproval', 'subscription_authorized_payment'].includes(type)) {
     return NextResponse.json({ received: true });
   }
   if (!validSignature(request, dataId)) return NextResponse.json({ error: 'Firma inválida.' }, { status: 401 });
 
   try {
+    if (type === 'payment') {
+      await processMemberDuePayment(dataId, body?.user_id ?? url.searchParams.get('user_id') ?? undefined);
+      return NextResponse.json({ received: true });
+    }
     if (type === 'subscription_preapproval') {
       const synced = await syncMercadoPagoSubscription(dataId);
       await recordEvent(`mercadopago-preapproval:${dataId}:${body?.action ?? 'updated'}`, synced.juntaId, body);

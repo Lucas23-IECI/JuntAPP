@@ -9,5 +9,9 @@ declare namespace NodeJS {
     readonly MERCADOPAGO_ACCESS_TOKEN?: string;
     readonly MERCADOPAGO_TEST_PAYER_EMAIL?: string;
     readonly MERCADOPAGO_WEBHOOK_SECRET?: string;
+    readonly MERCADOPAGO_CLIENT_ID?: string;
+    readonly MERCADOPAGO_CLIENT_SECRET?: string;
+    readonly MERCADOPAGO_CREDENTIALS_ENCRYPTION_KEY?: string;
+    readonly MERCADOPAGO_OAUTH_TEST_MODE?: string;
   }
 }

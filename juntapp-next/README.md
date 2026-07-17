@@ -31,6 +31,9 @@ npx supabase db push
 - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`: clave pública para el formulario seguro de tarjeta.
 - `MERCADOPAGO_ACCESS_TOKEN`: credencial privada para crear y verificar suscripciones mensuales de $15.000 CLP.
 - `MERCADOPAGO_TEST_PAYER_EMAIL`: comprador de prueba creado en Mercado Pago; solo se usa con credenciales `TEST-`.
+- `MERCADOPAGO_CLIENT_ID` y `MERCADOPAGO_CLIENT_SECRET`: aplicación OAuth que permite a cada junta conectar su propia cuenta.
+- `MERCADOPAGO_CREDENTIALS_ENCRYPTION_KEY`: secreto aleatorio de 32 caracteres o más para cifrar Access y Refresh Tokens por junta.
+- `MERCADOPAGO_OAUTH_TEST_MODE`: usa `true` en sandbox y `false` en producción.
 - `MERCADOPAGO_WEBHOOK_SECRET`: firma secreta configurada en Webhooks de Mercado Pago para producción.
 
 Nunca expongas `SUPABASE_SERVICE_ROLE_KEY` con el prefijo `NEXT_PUBLIC_`.
@@ -38,6 +41,22 @@ Nunca expongas `SUPABASE_SERVICE_ROLE_KEY` con el prefijo `NEXT_PUBLIC_`.
 Las juntas nuevas permanecen pendientes hasta que Mercado Pago autoriza la suscripción. El servidor fija y verifica $15.000 CLP mensuales, IVA incluido. Los webhooks de `subscription_preapproval` y `subscription_authorized_payment` sincronizan renovaciones, rechazos y cancelaciones.
 
 En Mercado Pago configura `/api/webhooks/mercadopago` y activa los eventos de planes y suscripciones. La suscripción puede cancelarse desde Registro de Socios por quien creó la junta.
+
+## Registro autónomo por código
+
+Cada junta tiene un `invite_code` único de seis caracteres. La directiva puede copiar desde Registro de Socios un enlace como `https://tu-dominio/registro?codigo=ABC123`; el vecino completa su registro y el trigger de Supabase lo asocia únicamente a esa junta. No requiere invitaciones masivas por correo.
+
+## Cobro de cuotas con la cuenta de cada junta
+
+Presidencia conecta la cuenta Mercado Pago de la junta desde Tesorería usando OAuth con PKCE. Los tokens quedan cifrados en `mercadopago_junta_accounts` y no son accesibles para clientes autenticados. Presidencia o Tesorería definen el monto mensual; cada vecino recibe una preferencia individual y el pago aprobado crea automáticamente el ingreso en el libro de caja.
+
+En la aplicación de Mercado Pago registra exactamente esta URL de redirección:
+
+```text
+https://tu-dominio/api/mercadopago/connect/callback
+```
+
+Configura también el webhook `https://tu-dominio/api/webhooks/mercadopago` con eventos de pagos. Para recibir webhooks y retorno automático, `NEXT_PUBLIC_APP_URL` debe ser una URL pública HTTPS.
 
 ## Webhook de pagos
 
