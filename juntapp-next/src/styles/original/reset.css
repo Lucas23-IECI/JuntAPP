@@ -1,0 +1,178 @@
+
+/* --- Reset & Accessibility Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+h1, h2, h3, h4, h5, h6, .outfit-font {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+/* Tabular numbers for numbers columns (Vercel compliance) */
+.tabular-nums,
+.ledger-amount,
+.stat-value,
+.t-stat-value,
+.results-bars {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Skip to content link (Vercel WCAG compliance) */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 20px;
+  background: var(--accent);
+  color: white;
+  padding: 10px 20px;
+  z-index: 3000;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  transition: top var(--transition-fast) var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  top: 10px;
+}
+
+/* Focus indicator style (Vercel compliance) */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 3px solid var(--primary-lighter);
+  outline-offset: 2px;
+}
+
+.form-input:focus-visible {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(27, 58, 92, 0.15);
+}
+
+/* --- Role Switching Visibility Controls --- */
+body.role-vecino .show-for-admin {
+  display: none !important;
+}
+body.role-vecino .hide-for-admin {
+  display: block;
+}
+
+body.role-dirigente .show-for-admin {
+  display: inline-flex !important;
+}
+body.role-dirigente button.show-for-admin {
+  display: inline-flex !important;
+}
+body.role-dirigente div.show-for-admin {
+  display: block !important;
+}
+body.role-dirigente .hide-for-admin {
+  display: none !important;
+}
+
+/* --- Top Demo Toolbar (Persist & Admin helper) --- */
+.demo-toolbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: var(--accent-orange);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 1000;
+  box-shadow: var(--shadow-sm);
+  font-size: 0.9rem;
+}
+
+.demo-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.demo-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 3px 8px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.demo-text {
+  font-weight: 500;
+  opacity: 0.95;
+}
+
+.role-selector {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+}
+
+.role-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.role-btn:hover {
+  color: white;
+}
+
+.role-btn.active {
+  background: white;
+  color: #d35400;
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- Layout Grid (Sidebar + Main) --- */
+.app-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* --- Sidebar Navigation --- */
