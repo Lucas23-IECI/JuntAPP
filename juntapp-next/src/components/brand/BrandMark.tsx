@@ -1,0 +1,23 @@
+type BrandMarkProps = {
+  className?: string;
+  size?: number;
+  title?: string;
+};
+
+export default function BrandMark({ className, size = 48, title = 'JuntAPP' }: BrandMarkProps) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="64 64 896 896"
+      role="img"
+      aria-label={title}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="64" y="64" width="896" height="896" rx="176" fill="#031636" />
+      <path fill="#fff" d="M548 252h170v342c0 166-94 252-244 252-120 0-198-50-234-150l162-42c18 46 45 66 93 66 60 0 89-38 89-108V252Z" />
+      <rect x="240" y="638" width="132" height="132" fill="#ff6b00" />
+    </svg>
+  );
+}

@@ -1,12 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { Junta, Notification, Profile } from '@/lib/types';
 import { boardPositionLabel } from '@/lib/board';
 import DashboardTour from './DashboardTour';
+import BrandMark from '@/components/brand/BrandMark';
 
 const navigation = [
   { route: 'inicio', label: 'Inicio', icon: 'home' },
@@ -88,7 +88,7 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
       <aside className="app-sidebar">
         <button className="sidebar-collapse-handle" onClick={toggleCollapsed} aria-label="Contraer o expandir barra lateral" title="Contraer / Expandir menú lateral"><span aria-hidden="true">‹</span></button>
         <button className="sidebar-brand" onClick={toggleCollapsed} title="Contraer / Expandir menú lateral">
-          <span className="logo-wrapper"><Image src="/brand/app-icon.svg" alt="JuntAPP Logo" className="brand-logo-img" width={48} height={48} priority /></span>
+          <span className="logo-wrapper"><BrandMark className="brand-logo-img" size={48} /></span>
           <span className="brand-info"><span className="brand-name">Junt<strong>APP</strong></span><span className="brand-tagline">{junta?.name ?? 'Mi Junta'}</span></span>
         </button>
         <div className="sidebar-profile">
@@ -105,7 +105,7 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
         </div>
       </aside>
       <main className="app-main-content" id="mainContent">
-        <header className="mobile-header"><div className="mobile-logo"><Image src="/brand/app-icon.svg" alt="JuntAPP Logo" width={36} height={36} priority/><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button></div></header>
+        <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button></div></header>
         {children}
       </main>
     </div>

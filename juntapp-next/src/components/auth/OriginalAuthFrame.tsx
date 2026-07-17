@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import BrandMark from '@/components/brand/BrandMark';
 
 export default function OriginalAuthFrame({ active, children }: { active: 'login' | 'register'; children: React.ReactNode }) {
   return (
@@ -7,7 +7,7 @@ export default function OriginalAuthFrame({ active, children }: { active: 'login
       <div className="auth-card">
         <Link href="/" className="auth-close-btn" aria-label="Cerrar">×</Link>
         <div className="auth-card-header">
-          <Image src="/brand/app-icon.svg" alt="JuntAPP Logo" className="auth-logo" width={64} height={64} priority />
+          <BrandMark className="auth-logo" size={64} />
           <h2>Junt<strong>APP</strong></h2>
           <p>Gestión Vecinal Digital</p>
         </div>
