@@ -7,7 +7,7 @@ export default function OriginalAuthFrame({ active, children }: { active: 'login
       <div className="auth-card">
         <Link href="/" className="auth-close-btn" aria-label="Cerrar">×</Link>
         <div className="auth-card-header">
-          <Image src="/logo.svg" alt="JuntAPP Logo" className="auth-logo" width={64} height={64} priority />
+          <Image src="/brand/app-icon.svg" alt="JuntAPP Logo" className="auth-logo" width={64} height={64} priority />
           <h2>Junt<strong>APP</strong></h2>
           <p>Gestión Vecinal Digital</p>
         </div>

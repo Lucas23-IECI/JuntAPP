@@ -32,14 +32,14 @@
 }
 
 .logo-wrapper {
-  width: 44px;
-  height: 44px;
-  background: var(--primary);
+  width: 48px;
+  height: 48px;
+  background: #fff;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 2px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
 }
@@ -52,6 +52,7 @@
 .brand-logo-img {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
 .brand-info {
@@ -2438,10 +2439,11 @@ body.logged-out .demo-toolbar {
 }
 
 .auth-logo {
-  height: 58px;
-  background-color: var(--primary);
-  border-radius: var(--radius-md);
-  padding: 8px;
+  width: 64px;
+  height: 64px;
+  background-color: transparent;
+  border-radius: 14px;
+  padding: 0;
   box-shadow: var(--shadow-md);
   margin-bottom: 12px;
 }
