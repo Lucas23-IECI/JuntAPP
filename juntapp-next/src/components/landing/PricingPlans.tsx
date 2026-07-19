@@ -11,7 +11,7 @@ const details: Record<PlanId, string[]> = {
 
 export default function PricingPlans() {
   const [whatsapp, setWhatsapp] = useState(false);
-  return <><header className="plans-nav"><Link href="/" className="plans-brand">Junt<span>APP</span></Link><nav><Link href="/caracteristicas">Características</Link><Link href="/faq">Preguntas frecuentes</Link><Link href="/login">Ingresar</Link></nav></header><main className="plans-page">
+  return <main className="plans-page">
     <section className="plans-hero"><span>PLANES TRANSPARENTES</span><h1>Una solución para cada junta vecinal</h1><p>Precios mensuales en pesos chilenos, IVA incluido. Sin contratos forzosos.</p></section>
     <section className="plans-grid" aria-label="Planes disponibles">
       {(Object.values(PLANS)).map((plan) => <article className={`plan-card plan-${plan.id} ${plan.id === 'juntapp_web' ? 'featured' : ''}`} key={plan.id}>
@@ -25,5 +25,5 @@ export default function PricingPlans() {
     </section>
     <label className="whatsapp-addon"><input type="checkbox" checked={whatsapp} onChange={(event) => setWhatsapp(event.target.checked)} /><span className="wa-icon">W</span><span><strong>Agregar WhatsApp masivo a cualquier plan</strong><small>Envío de avisos, recordatorios y notificaciones a los vecinos.</small></span><b>+${formatCLP(WHATSAPP_ADDON_PRICE_CLP)} / mes</b></label>
     <p className="plans-note">El monto mostrado será exactamente el que autorices en Mercado Pago. Renovación mensual; puedes cancelar futuras renovaciones.</p>
-  </main></>;
+  </main>;
 }

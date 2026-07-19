@@ -6,14 +6,14 @@ import { originalFragments } from '@/content/original-fragments';
 
 export type OriginalPublicView = 'home' | 'caracteristicas' | 'pricing' | 'faq' | 'sobreNosotros' | 'contacto';
 
-export default function OriginalPublicPage({ view }: { view: OriginalPublicView }) {
+export default function OriginalPublicPage({ view, children }: { view?: OriginalPublicView; children?: React.ReactNode }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const publicContent = view === 'pricing'
     ? originalFragments[view]
       .replace('>14.990<', '>15.000<')
       .replace('Prueba 30 Días Gratis', 'Crear Junta · $15.000 / mes')
-    : originalFragments[view];
+    : view ? originalFragments[view] : '';
 
   useEffect(() => {
     document.body.classList.add('logged-out', 'style-swiss');
@@ -220,7 +220,7 @@ export default function OriginalPublicPage({ view }: { view: OriginalPublicView 
       <div className="corporate-landing style-swiss">
         <div dangerouslySetInnerHTML={{ __html: originalFragments.header }} />
         <div dangerouslySetInnerHTML={{ __html: originalFragments.mobileNav }} />
-        <div id="mainContent" className="corporate-views-wrapper" dangerouslySetInnerHTML={{ __html: publicContent }} />
+        {children ? <div id="mainContent" className="corporate-views-wrapper">{children}</div> : <div id="mainContent" className="corporate-views-wrapper" dangerouslySetInnerHTML={{ __html: publicContent }} />}
         <div dangerouslySetInnerHTML={{ __html: originalFragments.footer }} />
       </div>
     </div>
