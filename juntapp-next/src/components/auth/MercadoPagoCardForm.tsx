@@ -14,7 +14,7 @@ type CardFormData = {
   payer: { identification?: { type: string; number: string } };
 };
 
-export default function MercadoPagoCardForm({ email, onApproved, onError }: { email: string; onApproved: (subscriptionId: string) => void; onError: (message: string) => void }) {
+export default function MercadoPagoCardForm({ email, amount, onApproved, onError }: { email: string; amount: number; onApproved: (subscriptionId: string) => void; onError: (message: string) => void }) {
   if (!publicKey) return <div className="auth-error-message">La clave pública de Mercado Pago no está configurada.</div>;
 
   async function submitSubscription(formData: CardFormData) {
@@ -34,7 +34,7 @@ export default function MercadoPagoCardForm({ email, onApproved, onError }: { em
 
   return <div className="mercadopago-brick-shell">
     <CardPayment
-      initialization={{ amount: 15_000, payer: { email } }}
+      initialization={{ amount, payer: { email } }}
       customization={{ paymentMethods: { minInstallments: 1, maxInstallments: 1 } }}
       locale="es-CL"
       onSubmit={submitSubscription}

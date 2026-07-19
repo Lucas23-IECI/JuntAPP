@@ -30,7 +30,9 @@ export default function LoginForm() {
         return;
       }
 
-      router.push('/inicio');
+      const { data: profile } = await supabase.from('profiles').select('juntas(subscription_plan)').single();
+      const junta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
+      router.push(junta?.subscription_plan === 'web' ? '/mi-pagina' : '/inicio');
       router.refresh();
     } catch {
       setError('Error de conexión. Intenta nuevamente.');

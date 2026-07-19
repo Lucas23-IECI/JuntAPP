@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 
-export const MONTHLY_SUBSCRIPTION_PRICE_CLP = 15_000;
+export const MONTHLY_SUBSCRIPTION_PRICE_CLP = 14_990;
 
 export type MercadoPagoSubscription = {
   id: string;
@@ -85,21 +85,18 @@ export async function syncMercadoPagoSubscription(subscriptionId: string, expect
 
   const [, juntaId, ownerId] = reference;
   if (expectedUserId && ownerId !== expectedUserId) throw new Error('La suscripción pertenece a otra cuenta.');
-  const recurring = subscription.auto_recurring;
-  if (Number(recurring?.transaction_amount) !== MONTHLY_SUBSCRIPTION_PRICE_CLP
-    || recurring?.currency_id !== 'CLP'
-    || recurring?.frequency !== 1
-    || recurring?.frequency_type !== 'months') {
-    throw new Error('La frecuencia, monto o moneda de la suscripción no corresponde al plan JuntAPP.');
-  }
-
   const admin = createAdminClient();
   const { data: junta, error: juntaError } = await admin
     .from('juntas')
-    .select('id, owner_id, subscription_status, subscription_last_payment_status, mercadopago_subscription_id')
+    .select('id, owner_id, subscription_price, subscription_status, subscription_last_payment_status, mercadopago_subscription_id')
     .eq('id', juntaId)
     .single();
   if (juntaError || !junta || junta.owner_id !== ownerId) throw new Error('No se encontró la junta asociada a la suscripción.');
+  const recurring = subscription.auto_recurring;
+  if (Number(recurring?.transaction_amount) !== Number(junta.subscription_price)
+    || recurring?.currency_id !== 'CLP' || recurring?.frequency !== 1 || recurring?.frequency_type !== 'months') {
+    throw new Error('La frecuencia, monto o moneda no corresponde al plan contratado.');
+  }
   if (junta.mercadopago_subscription_id
     && junta.mercadopago_subscription_id !== subscription.id
     && junta.subscription_status !== 'cancelled') {

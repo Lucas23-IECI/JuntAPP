@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import {
   mercadoPagoApiHeaders,
-  MONTHLY_SUBSCRIPTION_PRICE_CLP,
   subscriptionExternalReference,
   syncMercadoPagoSubscription,
   type MercadoPagoSubscription,
@@ -74,7 +73,7 @@ export async function POST(request: Request) {
         auto_recurring: {
           frequency: 1,
           frequency_type: 'months',
-          transaction_amount: MONTHLY_SUBSCRIPTION_PRICE_CLP,
+          transaction_amount: Number(junta.subscription_price),
           currency_id: 'CLP',
         },
         back_url: `${appUrl}/registro/pago`,

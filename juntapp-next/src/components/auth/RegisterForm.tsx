@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { cleanRUT, formatRUT, validateRUT } from '@/lib/utils';
 import { CHILE_REGIONS, getCommunes, isValidChileLocation } from '@/lib/chile-locations';
+import { formatCLP, isPlanId, PLANS, subscriptionPrice, type PlanId, WHATSAPP_ADDON_PRICE_CLP } from '@/lib/plans';
 
 type Step = 'account' | 'junta';
 
-export default function RegisterForm({ initialInviteCode = '' }: { initialInviteCode?: string }) {
+export default function RegisterForm({ initialInviteCode = '', initialPlan, initialWhatsapp = false }: { initialInviteCode?: string; initialPlan?: string; initialWhatsapp?: boolean }) {
   const [step, setStep] = useState<Step>('account');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,6 +31,8 @@ export default function RegisterForm({ initialInviteCode = '' }: { initialInvite
   const [juntaRegion, setJuntaRegion] = useState('');
   const [juntaComuna, setJuntaComuna] = useState('');
   const [inviteCode, setInviteCode] = useState(/^[A-Z0-9]{6}$/.test(initialInviteCode) ? initialInviteCode : '');
+  const [plan, setPlan] = useState<PlanId>(isPlanId(initialPlan) ? initialPlan : 'juntapp');
+  const [whatsapp, setWhatsapp] = useState(initialWhatsapp);
 
   function handleRutChange(value: string) {
     const clean = cleanRUT(value);
@@ -101,6 +104,8 @@ export default function RegisterForm({ initialInviteCode = '' }: { initialInvite
             junta_name: juntaAction === 'create' ? juntaName.trim() : undefined,
             junta_region: juntaAction === 'create' ? juntaRegion : undefined,
             junta_comuna: juntaAction === 'create' ? juntaComuna.trim() : undefined,
+            subscription_plan: juntaAction === 'create' ? plan : undefined,
+            whatsapp_addon: juntaAction === 'create' ? whatsapp : undefined,
           },
         },
       });
@@ -336,7 +341,9 @@ export default function RegisterForm({ initialInviteCode = '' }: { initialInvite
               </select>
             </div>
           </div>
-          <div className="registration-price-preview"><span>Suscripción mensual (IVA incluido)</span><strong>$15.000 CLP / mes</strong><small>La renovación es automática y se autoriza de forma segura en Mercado Pago después de crear tu cuenta.</small></div>
+          <fieldset className="registration-plan-picker"><legend>Elige tu plan</legend>{Object.values(PLANS).map((item) => <label className={plan === item.id ? 'selected' : ''} key={item.id}><input type="radio" name="plan" checked={plan === item.id} onChange={() => setPlan(item.id)} /><span><strong>{item.name}</strong><small>${formatCLP(item.price)} / mes</small></span></label>)}</fieldset>
+          <label className="registration-addon"><input type="checkbox" checked={whatsapp} onChange={(event) => setWhatsapp(event.target.checked)} /> WhatsApp masivo (+${formatCLP(WHATSAPP_ADDON_PRICE_CLP)} / mes)</label>
+          <div className="registration-price-preview"><span>{PLANS[plan].name} · IVA incluido</span><strong>${formatCLP(subscriptionPrice(plan, whatsapp))} CLP / mes</strong><small>Este mismo monto se autorizará en Mercado Pago y se renovará mensualmente.</small></div>
           <p className="form-help">Quedarás registrado como Presidente. Después podrás incorporar al Secretario, Tesorero y demás dirigentes.</p>
         </>
       )}

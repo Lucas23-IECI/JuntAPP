@@ -15,5 +15,5 @@ export default async function RegistrationPaymentPage() {
   if (!junta) redirect('/registro');
   if (junta.subscription_status === 'authorized') redirect('/inicio');
 
-  return <OriginalAuthFrame active="register"><PaymentActivation juntaName={junta.name} email={profile?.email ?? user.email ?? ''} /></OriginalAuthFrame>;
+  return <OriginalAuthFrame active="register"><PaymentActivation juntaName={junta.name} email={profile?.email ?? user.email ?? ''} plan={junta.subscription_plan ?? 'juntapp'} whatsapp={Boolean(junta.whatsapp_addon)} /></OriginalAuthFrame>;
 }

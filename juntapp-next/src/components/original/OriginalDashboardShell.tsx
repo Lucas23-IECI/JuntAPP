@@ -14,6 +14,7 @@ const navigation = [
   { route: 'tesoreria', label: 'Tesorería Transparente', icon: 'money' },
   { route: 'votaciones', label: 'Votaciones Digitales', icon: 'vote' },
   { route: 'comunicaciones', label: 'Anuncios Oficiales', icon: 'mail' },
+  { route: 'mi-pagina', label: 'Mi Página Web', icon: 'website' },
 ] as const;
 
 function NavIcon({ icon }: { icon: typeof navigation[number]['icon'] }) {
@@ -23,6 +24,7 @@ function NavIcon({ icon }: { icon: typeof navigation[number]['icon'] }) {
     money: <><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>,
     vote: <><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></>,
     mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3,7 12,13 21,7"/></>,
+    website: <><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></>,
   };
   return <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{paths[icon]}</svg>;
 }
@@ -42,11 +44,12 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
   const unreadCount = notifications.filter((notification) => !notification.read).length;
 
   useEffect(() => {
+    if (junta?.subscription_plan === 'web' && pathname !== '/mi-pagina') router.replace('/mi-pagina');
     const supabase = createClient();
     void supabase.from('notifications').select('*').eq('user_id', profile.id).order('date', { ascending: false }).limit(10).then(({ data }) => setNotifications(data ?? []));
     const channel = supabase.channel(`notifications:${profile.id}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${profile.id}` }, (payload) => setNotifications((current) => [payload.new as Notification, ...current].slice(0, 10))).subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [profile.id]);
+  }, [junta?.subscription_plan, pathname, profile.id, router]);
 
   function toggleCollapsed() {
     setCollapsed((value) => { localStorage.setItem('juntapp_sidebar_collapsed', String(!value)); return !value; });
@@ -84,28 +87,29 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
   return <div className="original-dashboard-root">
     <DashboardTour />
     <a href="#mainContent" className="skip-link">Saltar al contenido principal</a>
-    <div className={`app-layout ${collapsed ? 'collapsed-sidebar' : ''}`}>
+    <div className={`app-layout ${collapsed ? 'collapsed-sidebar' : ''} ${junta?.subscription_plan === 'web' ? 'website-only-plan' : ''}`}>
       <aside className="app-sidebar">
         <button className="sidebar-collapse-handle" onClick={toggleCollapsed} aria-label="Contraer o expandir barra lateral" title="Contraer / Expandir menú lateral"><span aria-hidden="true">‹</span></button>
         <button className="sidebar-brand" onClick={toggleCollapsed} title="Contraer / Expandir menú lateral">
           <span className="logo-wrapper"><BrandMark className="brand-logo-img" size={48} /></span>
-          <span className="brand-info"><span className="brand-name">Junt<strong>APP</strong></span><span className="brand-tagline">{junta?.name ?? 'Mi Junta'}</span></span>
+          <span className="brand-info"><span className="brand-name">Junt<strong>APP</strong></span><span className="brand-tagline">{junta?.subscription_plan === 'web' ? 'Creador de páginas' : junta?.name ?? 'Mi Junta'}</span></span>
         </button>
         <div className="sidebar-profile">
-          <div className="sidebar-profile-main"><div className="sidebar-user-avatar" id="userAvatar">{profile.name.charAt(0).toUpperCase()}</div><div className="sidebar-user-copy"><strong id="userProfileName">{profile.name}</strong><span id="userProfileRole">{profile.role === 'dirigente' ? boardPositionLabel(profile.board_position) : 'Vecino'}</span></div></div>
+          <div className="sidebar-profile-main"><div className="sidebar-user-avatar" id="userAvatar">{profile.name.charAt(0).toUpperCase()}</div><div className="sidebar-user-copy"><strong id="userProfileName">{profile.name}</strong><span id="userProfileRole">{junta?.subscription_plan === 'web' ? 'Editor del sitio web' : profile.role === 'dirigente' ? boardPositionLabel(profile.board_position) : 'Vecino'}</span></div></div>
           <div className="sidebar-profile-meta"><span id="userProfileRut">RUT: {profile.rut}</span><button id="btnLogoutBtn" onClick={logout}>Cerrar Sesión</button></div>
         </div>
         <nav className="sidebar-nav" aria-label="Navegación del panel">
-          {navigation.map((item) => <button type="button" className={`nav-item ${currentRoute === item.route ? 'active' : ''}`} id={`nav-${item.route}`} data-view={item.route} key={item.route} onClick={() => router.push(`/${item.route}`)}><NavIcon icon={item.icon}/><span>{item.label}</span>{item.route === 'comunicaciones' && unreadCount > 0 && <span className="badge badge-accent">{unreadCount}</span>}</button>)}
+          {navigation.filter((item) => item.route === 'mi-pagina' ? ['web','juntapp_web'].includes(junta?.subscription_plan ?? '') : junta?.subscription_plan !== 'web').map((item) => <button type="button" className={`nav-item ${currentRoute === item.route ? 'active' : ''}`} id={`nav-${item.route}`} data-view={item.route} key={item.route} onClick={() => router.push(`/${item.route}`)}><NavIcon icon={item.icon}/><span>{item.label}</span>{item.route === 'comunicaciones' && unreadCount > 0 && <span className="badge badge-accent">{unreadCount}</span>}</button>)}
         </nav>
         <div className="sidebar-footer">
           <button className="theme-btn notifications-bell-btn" id="bellToggle" onClick={() => setNotificationsOpen((value) => !value)}><span className="bell-icon-wrapper"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</span><span>Notificaciones</span></button>
           <button className="theme-btn" id="themeToggle" onClick={toggleTheme}><span aria-hidden="true">{dark ? '☀' : '☾'}</span><span>{dark ? 'Modo Claro' : 'Modo Oscuro'}</span></button>
+          <button className="theme-btn dashboard-logout-btn" type="button" onClick={logout}><span aria-hidden="true">↪</span><span>Cerrar sesión</span></button>
           <div className="purocode-signature">Powered by <strong>PuroCode</strong></div>
         </div>
       </aside>
       <main className="app-main-content" id="mainContent">
-        <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button></div></header>
+        <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button><button className="mobile-logout-btn" type="button" onClick={logout} aria-label="Cerrar sesión" title="Cerrar sesión">Salir</button></div></header>
         {children}
       </main>
     </div>

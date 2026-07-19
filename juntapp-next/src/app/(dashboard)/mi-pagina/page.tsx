@@ -1,0 +1,4 @@
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import WebsiteBuilder from '@/components/website/WebsiteBuilder';
+export default async function MyWebsitePage(){const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect('/login');const {data:profile}=await supabase.from('profiles').select('role,junta_id,juntas(*)').eq('id',user.id).single();const junta=Array.isArray(profile?.juntas)?profile.juntas[0]:profile?.juntas;if(!junta||profile?.role!=='dirigente')redirect('/inicio');if(!['web','juntapp_web'].includes(junta.subscription_plan??'juntapp'))redirect('/pricing');const {data:page}=await supabase.from('website_pages').select('*').eq('junta_id',junta.id).maybeSingle();return <WebsiteBuilder juntaId={junta.id} juntaName={junta.name} slug={junta.slug} plan={junta.subscription_plan as 'web'|'juntapp_web'} initial={page}/>}

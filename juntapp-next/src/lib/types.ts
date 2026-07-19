@@ -18,6 +18,8 @@ export interface Junta {
   owner_id: string | null;
   subscription_status: 'pending' | 'authorized' | 'paused' | 'cancelled' | 'past_due';
   subscription_price: number;
+  subscription_plan: 'juntapp' | 'juntapp_web' | 'web';
+  whatsapp_addon: boolean;
   mercadopago_preference_id: string | null;
   mercadopago_payment_id: string | null;
   mercadopago_subscription_id: string | null;
