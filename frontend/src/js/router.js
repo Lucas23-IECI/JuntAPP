@@ -127,6 +127,12 @@ export class Router {
     }
 
 
+    // Remove initial FOUC bypass style to allow normal navigation
+    const foucBypass = document.getElementById("initial-fouc-bypass-style");
+    if (foucBypass) {
+      foucBypass.remove();
+    }
+
     // Gatilla el callback registrado para esta vista
     if (typeof this.routes[viewName] === "function") {
       this.routes[viewName]();

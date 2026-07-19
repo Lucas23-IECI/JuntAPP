@@ -14,6 +14,19 @@
   <link rel="stylesheet" href="/src/css/style.css" />
   <!-- Chart.js for real-time financials -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Inline FOUC Bypass Script for clean reloads -->
+  <script>
+    (function() {
+      var path = window.location.pathname.substring(1) || 'home';
+      var publicRoutes = ["home", "caracteristicas", "pricing", "faq", "sobre-nosotros", "contacto", "legal"];
+      if (publicRoutes.indexOf(path) !== -1) {
+        var style = document.createElement('style');
+        style.id = 'initial-fouc-bypass-style';
+        style.innerHTML = '.corporate-view { display: none !important; opacity: 0 !important; } #corp-' + path + ' { display: block !important; opacity: 1 !important; }';
+        document.head.appendChild(style);
+      }
+    })();
+  </script>
 </head>
 <body class="role-vecino logged-out style-swiss"> <!-- Default role: Vecino, start as logged-out -->
   
