@@ -36,6 +36,16 @@ for (const viewport of viewports) {
     const result = await page.evaluate(() => {
       const main = document.querySelector('#mainContent, main, .auth-card');
       const rect = main?.getBoundingClientRect();
+      const intersects = (first, second) => first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top;
+      const decorativeOverlaps = [...document.querySelectorAll('.tape-holder')].flatMap((decoration) => {
+        const parent = decoration.parentElement;
+        const title = parent?.querySelector(':scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > .bento-text-column h4, :scope > .bento-content-mural h4');
+        if (!title || !intersects(decoration.getBoundingClientRect(), title.getBoundingClientRect())) return [];
+        return [`${parent.className} -> ${title.textContent?.trim()}`];
+      });
+      const financeLabel = document.querySelector('.ring-text-mural');
+      const financeCopy = financeLabel?.closest('.bento-card-mural')?.querySelector('.bento-content-mural');
+      if (financeLabel && financeCopy && intersects(financeLabel.getBoundingClientRect(), financeCopy.getBoundingClientRect())) decorativeOverlaps.push('porcentaje financiero -> texto de tarjeta');
       return {
         title: document.title,
         textLength: document.body.innerText.replace(/\s+/g, ' ').trim().length,
@@ -45,6 +55,7 @@ for (const viewport of viewports) {
         mojibake: /Ã|Â|ðŸ|â€|�/.test(document.body.innerText),
         navVisible: !!document.querySelector('.landing-header, .auth-card, .plans-nav'),
         scripts: document.scripts.length,
+        decorativeOverlaps,
         overflowElements: [...document.querySelectorAll('body *')]
           .map((element) => {
             const box = element.getBoundingClientRect();
@@ -76,6 +87,7 @@ for (const viewport of viewports) {
     if (result.mainHeight < 250 || result.mainDisplay === 'none') issues.push(`contenido oculto (${result.mainHeight}px)`);
     if (result.overflow > 2) issues.push(`desborde horizontal (${result.overflow}px)`);
     if (result.mojibake) issues.push('texto con codificación dañada');
+    if (result.decorativeOverlaps.length) issues.push(`decoración sobre texto (${result.decorativeOverlaps.join('; ')})`);
     if (!result.navVisible) issues.push('navegación ausente');
     if (errors.length) issues.push(`${errors.length} errores de consola`);
     const label = `${viewport.name.padEnd(7)} ${route.padEnd(20)}`;

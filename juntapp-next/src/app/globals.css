@@ -92,6 +92,51 @@
   .original-dashboard-root .sidebar-nav .nav-item > span:not(.badge) { width: 100%; overflow-wrap: anywhere; line-height: 1.15; }
 }
 
+/* Detail-level collision fixes shared by desktop and mobile. */
+.original-public-root.style-swiss .finance-progress-container,
+.original-public-root.style-swiss .finance-circular-ring {
+  position: relative !important;
+  width: 72px !important;
+  height: 72px !important;
+  min-width: 72px !important;
+}
+
+.original-public-root.style-swiss .finance-circular-ring .radial-ring-svg {
+  display: block !important;
+  width: 72px !important;
+  height: 72px !important;
+}
+
+.original-public-root.style-swiss .laws-visual-whiteboard {
+  padding-top: 48px !important;
+}
+
+.original-public-root.style-swiss .laws-visual-whiteboard > .tape-holder {
+  width: 42px !important;
+  height: 13px !important;
+  opacity: .72 !important;
+}
+
+.original-public-root.style-swiss .laws-visual-whiteboard > .tape-top-left {
+  top: 8px !important;
+  left: 8px !important;
+}
+
+.original-public-root.style-swiss .laws-visual-whiteboard > .tape-top-right {
+  top: 8px !important;
+  right: 8px !important;
+}
+
+.original-public-root.style-swiss .laws-visual-whiteboard > .tape-bottom-left {
+  bottom: 8px !important;
+  left: 8px !important;
+}
+
+.original-public-root.style-swiss .laws-visual-whiteboard > .tape-bottom-right {
+  right: 8px !important;
+  bottom: 8px !important;
+}
+
 @theme {
   /* Colors - Chilean institutional palette */
   --color-primary: hsl(215, 60%, 16%);
@@ -231,5 +276,45 @@ body .plans-page .plans-hero p{color:#fff!important}body .plans-page .plan-card.
     max-width: calc(100% - 16px) !important;
     white-space: normal !important;
     text-align: center !important;
+  }
+
+  /* Keep the finance percentage inside its own chart instead of letting its
+     absolutely-positioned label escape over the card heading. */
+  .original-public-root.style-swiss .widget-finance-mural {
+    display: grid !important;
+    grid-template-columns: 72px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 14px !important;
+  }
+
+  .original-public-root.style-swiss .ring-text-mural {
+    width: 58px !important;
+    z-index: 1 !important;
+  }
+
+  /* Decorative tape belongs above the content area. Reserve space so it can
+     never cover the first line of a whiteboard title. */
+  .original-public-root.style-swiss .bento-card-whiteboard > .tape-holder {
+    top: 7px !important;
+    width: 42px !important;
+    height: 13px !important;
+    opacity: .72 !important;
+  }
+
+  .original-public-root.style-swiss .bento-card-whiteboard > .tape-top-left {
+    left: 7px !important;
+  }
+
+  .original-public-root.style-swiss .bento-card-whiteboard > .tape-top-right {
+    right: 7px !important;
+  }
+
+  .original-public-root.style-swiss .bento-card-whiteboard > .bento-text-column,
+  .original-public-root.style-swiss .bento-card-whiteboard > .bento-content-mural {
+    padding-top: 18px !important;
+  }
+
+  .original-public-root.style-swiss .laws-visual-whiteboard {
+    transform: none !important;
   }
 }
