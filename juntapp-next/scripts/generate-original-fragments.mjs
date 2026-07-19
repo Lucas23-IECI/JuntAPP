@@ -41,6 +41,7 @@ const fragments = {
   caracteristicas: extractElement('id="corp-caracteristicas"'),
   pricing: extractElement('id="corp-pricing"'),
   faq: extractElement('id="corp-faq"'),
+  legal: extractElement('id="corp-legal"'),
   sobreNosotros: extractElement('id="corp-sobre-nosotros"'),
   contacto: extractElement('id="corp-contacto"'),
   sidebar: extractElement('class="app-sidebar"'),

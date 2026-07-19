@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { originalFragments } from '@/content/original-fragments';
 
-export type OriginalPublicView = 'home' | 'caracteristicas' | 'pricing' | 'faq' | 'sobreNosotros' | 'contacto';
+export type OriginalPublicView = 'home' | 'caracteristicas' | 'pricing' | 'faq' | 'sobreNosotros' | 'contacto' | 'legal';
 
 export default function OriginalPublicPage({ view, children }: { view?: OriginalPublicView; children?: React.ReactNode }) {
   const rootRef = useRef<HTMLDivElement>(null);
