@@ -41,7 +41,9 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
   const [dark, setDark] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const visibleNavigation = navigation.filter((item) => item.route === 'mi-pagina' ? ['web','juntapp_web'].includes(junta?.subscription_plan ?? '') : junta?.subscription_plan !== 'web');
 
   useEffect(() => {
     if (junta?.subscription_plan === 'web' && pathname !== '/mi-pagina') router.replace('/mi-pagina');
@@ -99,7 +101,7 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
           <div className="sidebar-profile-meta"><span id="userProfileRut">RUT: {profile.rut}</span><button id="btnLogoutBtn" onClick={logout}>Cerrar Sesión</button></div>
         </div>
         <nav className="sidebar-nav" aria-label="Navegación del panel">
-          {navigation.filter((item) => item.route === 'mi-pagina' ? ['web','juntapp_web'].includes(junta?.subscription_plan ?? '') : junta?.subscription_plan !== 'web').map((item) => <button type="button" aria-label={item.label} title={item.label} className={`nav-item ${currentRoute === item.route ? 'active' : ''}`} id={`nav-${item.route}`} data-view={item.route} key={item.route} onClick={() => router.push(`/${item.route}`)}><NavIcon icon={item.icon}/><span>{item.label}</span>{item.route === 'comunicaciones' && unreadCount > 0 && <span className="badge badge-accent">{unreadCount}</span>}</button>)}
+          {visibleNavigation.map((item) => <button type="button" aria-label={item.label} title={item.label} className={`nav-item ${currentRoute === item.route ? 'active' : ''}`} id={`nav-${item.route}`} data-view={item.route} key={item.route} onClick={() => router.push(`/${item.route}`)}><NavIcon icon={item.icon}/><span>{item.label}</span>{item.route === 'comunicaciones' && unreadCount > 0 && <span className="badge badge-accent">{unreadCount}</span>}</button>)}
         </nav>
         <div className="sidebar-footer">
           <button className="theme-btn notifications-bell-btn" id="bellToggle" onClick={() => setNotificationsOpen((value) => !value)}><span className="bell-icon-wrapper"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</span><span>Notificaciones</span></button>
@@ -109,7 +111,8 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
         </div>
       </aside>
       <main className="app-main-content" id="mainContent">
-        <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button><button className="mobile-logout-btn" type="button" onClick={logout} aria-label="Cerrar sesión" title="Cerrar sesión">Salir</button></div></header>
+        <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button><button className="mobile-menu-toggle" type="button" aria-label={mobileMenuOpen?'Cerrar menú':'Abrir menú'} aria-expanded={mobileMenuOpen} onClick={()=>setMobileMenuOpen((value)=>!value)}><span/><span/><span/></button></div></header>
+        {mobileMenuOpen&&<div className="mobile-navigation-menu" role="navigation" aria-label="Menú principal">{visibleNavigation.map((item)=><button type="button" className={currentRoute===item.route?'active':''} key={item.route} onClick={()=>{setMobileMenuOpen(false);router.push(`/${item.route}`)}}><NavIcon icon={item.icon}/><span>{item.label}</span></button>)}<div className="mobile-menu-secondary"><button type="button" onClick={toggleTheme}>{dark?'Modo claro':'Modo oscuro'}</button><button type="button" className="logout" onClick={logout}>Cerrar sesión</button></div></div>}
         {children}
       </main>
     </div>
