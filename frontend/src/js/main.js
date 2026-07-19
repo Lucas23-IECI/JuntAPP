@@ -34,6 +34,7 @@ const routes = {
   faq: () => {},
   "sobre-nosotros": () => {},
   contacto: () => {},
+  legal: () => {},
 
   // Rutas privadas del dashboard
   inicio: () => {
@@ -297,6 +298,27 @@ if (billingToggleBtn) {
       if (periodPilot) periodPilot.textContent = " / mes";
       if (periodActiva) periodActiva.textContent = " / mes";
       if (periodGrande) periodGrande.textContent = " / mes";
+    }
+  });
+}
+
+// 4b. WhatsApp Addon Checkbox for pricing subpage
+const whatsappAddonCheckbox = document.getElementById("whatsappAddonCheckbox");
+if (whatsappAddonCheckbox) {
+  const priceJuntapp = document.getElementById("price-juntapp");
+  const priceJuntappWeb = document.getElementById("price-juntapp_web");
+  const priceWeb = document.getElementById("price-web");
+
+  whatsappAddonCheckbox.addEventListener("change", () => {
+    const isChecked = whatsappAddonCheckbox.checked;
+    if (isChecked) {
+      if (priceJuntapp) priceJuntapp.textContent = "22.980";
+      if (priceJuntappWeb) priceJuntappWeb.textContent = "30.980";
+      if (priceWeb) priceWeb.textContent = "17.980";
+    } else {
+      if (priceJuntapp) priceJuntapp.textContent = "14.990";
+      if (priceJuntappWeb) priceJuntappWeb.textContent = "22.990";
+      if (priceWeb) priceWeb.textContent = "9.990";
     }
   });
 }

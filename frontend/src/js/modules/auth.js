@@ -238,7 +238,7 @@ export const authModule = {
     authOverlay.classList.remove("active");
     
     // Only redirect to / if we are on a private route (dashboard routes)
-    const publicRoutes = ["", "/", "/home", "/caracteristicas", "/pricing", "/faq", "/sobre-nosotros", "/contacto"];
+    const publicRoutes = ["", "/", "/home", "/caracteristicas", "/pricing", "/faq", "/sobre-nosotros", "/contacto", "/legal"];
     if (!publicRoutes.includes(window.location.pathname)) {
       window.history.replaceState({}, "", "/");
     }

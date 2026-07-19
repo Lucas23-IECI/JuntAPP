@@ -55,7 +55,7 @@ export class Router {
     let viewName = window.location.pathname.substring(1);
     const isLoggedOut = document.body.classList.contains("logged-out");
 
-    const publicRoutes = ["home", "caracteristicas", "pricing", "faq", "sobre-nosotros", "contacto"];
+    const publicRoutes = ["home", "caracteristicas", "pricing", "faq", "sobre-nosotros", "contacto", "legal"];
     const privateRoutes = ["inicio", "socios", "tesoreria", "votaciones", "comunicaciones"];
 
     // Si no hay ruta o es raíz, determinar por defecto según el estado de sesión
