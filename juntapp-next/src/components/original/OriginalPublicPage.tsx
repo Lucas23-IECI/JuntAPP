@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { originalFragments } from '@/content/original-fragments';
 
 export type OriginalPublicView = 'home' | 'caracteristicas' | 'pricing' | 'faq' | 'sobreNosotros' | 'contacto';
@@ -9,17 +9,49 @@ export type OriginalPublicView = 'home' | 'caracteristicas' | 'pricing' | 'faq' 
 export default function OriginalPublicPage({ view, children }: { view?: OriginalPublicView; children?: React.ReactNode }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const handleRootClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target as Element;
+    const root = rootRef.current;
+    if (!root) return;
+
+    if (target.closest('#mobileNavToggleBtn')) {
+      root.querySelector('#mobileNavToggleBtn')?.classList.toggle('open');
+      root.querySelector('#mobileNavMenu')?.classList.toggle('open');
+      return;
+    }
+
+    const mobileLink = target.closest('.mobile-nav-link');
+    if (mobileLink) {
+      root.querySelector('#mobileNavToggleBtn')?.classList.remove('open');
+      root.querySelector('#mobileNavMenu')?.classList.remove('open');
+      return;
+    }
+
+    const question = target.closest('.faq-question');
+    if (question) {
+      const item = question.closest('.faq-item');
+      const expanded = question.getAttribute('aria-expanded') === 'true';
+      root.querySelectorAll('.faq-item').forEach((other) => {
+        if (other !== item) other.classList.remove('active');
+        other.querySelector('.faq-question')?.setAttribute('aria-expanded', 'false');
+      });
+      item?.classList.toggle('active', !expanded);
+      question.setAttribute('aria-expanded', String(!expanded));
+    }
+  };
   const publicContent = view === 'pricing'
     ? originalFragments[view]
       .replace('>14.990<', '>15.000<')
       .replace('Prueba 30 Días Gratis', 'Crear Junta · $15.000 / mes')
-    : view ? originalFragments[view] : '';
+    : view ? originalFragments[view].replace('class="corporate-view"', 'class="corporate-view active"') : '';
 
   useEffect(() => {
     document.body.classList.add('logged-out', 'style-swiss');
     document.body.classList.remove('logged-in', 'role-vecino', 'role-dirigente');
     const root = rootRef.current;
     if (!root) return;
+    root.dataset.publicReady = 'true';
 
     const cleanups: Array<() => void> = [];
     const listen = (element: Element | null, event: string, handler: EventListener) => {
@@ -27,17 +59,12 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
       if (element) cleanups.push(() => element.removeEventListener(event, handler));
     };
 
-    const mobileToggle = root.querySelector('#mobileNavToggleBtn');
-    const mobileMenu = root.querySelector('#mobileNavMenu');
-    listen(mobileToggle, 'click', () => {
-      mobileToggle?.classList.toggle('open');
-      mobileMenu?.classList.toggle('open');
+    root.querySelectorAll<HTMLAnchorElement>('.landing-nav-link, .mobile-nav-link').forEach((link) => {
+      const current = link.getAttribute('href') === pathname;
+      link.classList.toggle('active', current);
+      if (current) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
     });
-    root.querySelectorAll('.mobile-nav-link').forEach((link) => listen(link, 'click', () => {
-      mobileToggle?.classList.remove('open');
-      mobileMenu?.classList.remove('open');
-    }));
-
     const applyTheme = (dark: boolean) => {
       if (dark) document.documentElement.setAttribute('data-theme', 'dark');
       else document.documentElement.removeAttribute('data-theme');
@@ -51,19 +78,6 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
 
     root.querySelectorAll('.btn-open-auth').forEach((button) => {
       listen(button, 'click', () => router.push(button.getAttribute('data-tab') === 'register' ? '/registro' : '/login'));
-    });
-
-    root.querySelectorAll('.faq-question').forEach((question) => {
-      listen(question, 'click', () => {
-        const item = question.closest('.faq-item');
-        const expanded = question.getAttribute('aria-expanded') === 'true';
-        root.querySelectorAll('.faq-item').forEach((other) => {
-          if (other !== item) other.classList.remove('active');
-          other.querySelector('.faq-question')?.setAttribute('aria-expanded', 'false');
-        });
-        item?.classList.toggle('active');
-        question.setAttribute('aria-expanded', String(!expanded));
-      });
     });
 
     root.querySelectorAll('.faq-category-btn').forEach((button) => {
@@ -210,12 +224,13 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
 
     return () => {
       cleanups.forEach((cleanup) => cleanup());
+      delete root.dataset.publicReady;
       document.body.classList.remove('logged-out');
     };
-  }, [router, view]);
+  }, [pathname, router, view]);
 
   return (
-    <div ref={rootRef} className="original-public-root style-swiss">
+    <div ref={rootRef} className="original-public-root style-swiss" onClick={handleRootClick}>
       <a href="#mainContent" className="skip-link">Saltar al contenido principal</a>
       <div className="corporate-landing style-swiss">
         <div dangerouslySetInnerHTML={{ __html: originalFragments.header }} />

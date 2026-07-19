@@ -2895,7 +2895,9 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   --shadow-lg: 8px 8px 0px #ff6b00 !important;
   --shadow-xl: 10px 10px 0px #ff6b00 !important;
   background-color: #ffffff !important;
-  zoom: 90% !important;
+  /* Browser zoom changed layout metrics and created horizontal overflow on every
+     public and authentication route. Responsive sizes are handled by media queries. */
+  zoom: 100% !important;
 }
 
 .style-swiss h1,

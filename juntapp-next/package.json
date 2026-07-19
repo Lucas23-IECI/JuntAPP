@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "audit:public": "node scripts/audit-public-pages.mjs"
   },
   "dependencies": {
     "@mercadopago/sdk-react": "^1.0.7",
