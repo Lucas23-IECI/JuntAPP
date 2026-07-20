@@ -375,3 +375,9 @@ body .plans-page .plans-hero p{color:#fff!important}body .plans-page .plan-card.
   margin-bottom: 0 !important;
 }
 
+.style-swiss .subpage-corkboard-header .section-title-handwritten,
+.original-public-root.style-swiss .subpage-corkboard-header .section-title-handwritten {
+  color: #031636 !important;
+  text-shadow: none !important;
+}
+

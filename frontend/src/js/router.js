@@ -51,8 +51,7 @@ export class Router {
   }
 
   handleRouting() {
-    // Obtener la vista desde el pathname (sin la barra inicial)
-    let viewName = window.location.pathname.substring(1);
+    let viewName = window.location.pathname.substring(1).split("#")[0].split("?")[0];
     const isLoggedOut = document.body.classList.contains("logged-out");
 
     const publicRoutes = ["home", "caracteristicas", "pricing", "faq", "sobre-nosotros", "contacto", "legal"];
@@ -120,7 +119,9 @@ export class Router {
     }
 
     // Scroll to top when navigating
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
     const mainContent = document.getElementById("mainContent");
     if (mainContent) {
       mainContent.scrollTop = 0;

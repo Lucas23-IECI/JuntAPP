@@ -47,6 +47,9 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
     : view ? originalFragments[view].replace('class="corporate-view"', 'class="corporate-view active"') : '';
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
     document.body.classList.add('logged-out', 'style-swiss');
     document.body.classList.remove('logged-in', 'role-vecino', 'role-dirigente');
     const root = rootRef.current;

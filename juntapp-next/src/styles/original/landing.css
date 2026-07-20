@@ -6114,8 +6114,8 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   font-weight: 950 !important;
   text-transform: uppercase !important;
   letter-spacing: -0.01em !important;
-  text-shadow: 2px 2px 0px #000 !important;
-  color: #fff !important;
+  text-shadow: none !important;
+  color: #031636 !important;
 }
 
 .style-swiss .subpage-corkboard-header .section-description-handwritten {
