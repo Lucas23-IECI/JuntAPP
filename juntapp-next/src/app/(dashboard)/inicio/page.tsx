@@ -21,16 +21,18 @@ export default async function InicioPage() {
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase.from('profiles').select('*, juntas(name)').eq('id', user!.id).single();
   const juntaId = profile?.junta_id;
-  const [{ count: sociosCount }, { data: socios }, { data: transactions }, { data: announcements }, { data: activePoll }] = await Promise.all([
+  const period = `${new Date().toISOString().slice(0, 7)}-01`;
+  const [{ count: sociosCount }, { data: paidDues }, { data: transactions }, { data: announcements }, { data: activePoll }] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('junta_id', juntaId),
-    supabase.from('profiles').select('cuota_status').eq('junta_id', juntaId),
+    supabase.from('member_dues').select('household_id').eq('junta_id', juntaId).eq('period', period).eq('status', 'paid').not('household_id', 'is', null),
     supabase.from('transactions').select('type, amount').eq('junta_id', juntaId),
     supabase.from('announcements').select('*').eq('junta_id', juntaId).order('created_at', { ascending: false }).limit(3),
     supabase.from('polls').select('title').eq('junta_id', juntaId).eq('active', true).maybeSingle(),
   ]);
   const income = transactions?.filter((t) => t.type === 'ingreso').reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
   const expenses = transactions?.filter((t) => t.type === 'egreso').reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
-  const paid = socios?.filter((s) => s.cuota_status === 'al_dia').length ?? 0;
+  const paid = new Set((paidDues ?? []).map((due) => due.household_id)).size;
+  const myDuePaid = (paidDues ?? []).some((due) => due.household_id === profile?.household_id);
   const junta = Array.isArray(profile?.juntas) ? profile.juntas[0]?.name : profile?.juntas?.name;
   const month = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric' }).format(new Date());
   const urgent = announcements?.find((item) => item.category === 'urgente');
@@ -46,9 +48,9 @@ export default async function InicioPage() {
 
       <div className="stats-grid">
         <div className="stat-card note-yellow-v3"><div className="stat-icon income"><Icon type="money" /></div><div className="stat-details"><span className="stat-label">Caja Disponible</span><h3 className="stat-value">{formatCurrency(income - expenses)}</h3><span className="stat-trend success">✔ Cuentas transparentes</span></div></div>
-        <div className="stat-card note-blue-v3"><div className="stat-icon members"><Icon type="members" /></div><div className="stat-details"><span className="stat-label">Socios Registrados</span><h3 className="stat-value">{sociosCount ?? 0}</h3><span className="stat-trend">{paid} con cuota al día</span></div></div>
+        <div className="stat-card note-blue-v3"><div className="stat-icon members"><Icon type="members" /></div><div className="stat-details"><span className="stat-label">Socios Registrados</span><h3 className="stat-value">{sociosCount ?? 0}</h3><span className="stat-trend">{paid} domicilios con cuota al día</span></div></div>
         <Link className="stat-card select-action note-orange-v3" href="/votaciones"><div className="stat-icon voting"><Icon type="vote" /></div><div className="stat-details"><span className="stat-label">Votación Activa</span><h3 className="stat-value text-accent">{activePoll?.title ?? 'Sin consulta activa'}</h3><span className="stat-trend accent">{activePoll ? 'Participa ahora' : 'Te avisaremos de la próxima'}</span></div></Link>
-        <div className="stat-card note-green-v3"><div className="stat-icon event"><Icon type="calendar" /></div><div className="stat-details"><span className="stat-label">Mi Estado de Cuota</span><h3 className="stat-value">{profile?.cuota_status === 'al_dia' ? 'Al Día' : 'Pendiente'}</h3><span className="stat-trend">Socio de la comunidad</span></div></div>
+        <div className="stat-card note-green-v3"><div className="stat-icon event"><Icon type="calendar" /></div><div className="stat-details"><span className="stat-label">Cuota de mi Domicilio</span><h3 className="stat-value">{myDuePaid ? 'Al Día' : 'Pendiente'}</h3><span className="stat-trend">{profile?.address}</span></div></div>
       </div>
 
       <div className="split-grid">

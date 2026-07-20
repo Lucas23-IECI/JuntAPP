@@ -25,18 +25,42 @@ export default async function SociosPage() {
   const period = `${new Date().toISOString().slice(0, 7)}-01`;
   const { data: mercadoPagoDues } = await supabase
     .from('member_dues')
-    .select('profile_id')
+    .select('household_id')
     .eq('junta_id', profile?.junta_id)
     .eq('period', period)
     .eq('status', 'paid')
     .not('mercadopago_payment_id', 'is', null);
+  const { data: paidDues } = await supabase
+    .from('member_dues')
+    .select('household_id')
+    .eq('junta_id', profile?.junta_id)
+    .eq('period', period)
+    .eq('status', 'paid')
+    .not('household_id', 'is', null);
+  const paidHouseholdIds = new Set((paidDues ?? []).map((due) => due.household_id));
+  const sociosWithCurrentStatus = (socios ?? []).map((socio) => ({
+    ...socio,
+    cuota_status: paidHouseholdIds.has(socio.household_id) ? 'al_dia' as const : 'pendiente' as const,
+  }));
+  const currentProfile = profile ? {
+    ...profile,
+    cuota_status: paidHouseholdIds.has(profile.household_id) ? 'al_dia' as const : 'pendiente' as const,
+  } : null;
+
+  const { data: applications } = profile?.role === 'dirigente' ? await supabase
+    .from('membership_applications')
+    .select('*')
+    .eq('junta_id', profile.junta_id)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true }) : { data: [] };
 
   return (
     <SociosClient
-      socios={socios || []}
-      currentProfile={profile!}
+      socios={sociosWithCurrentStatus}
+      currentProfile={currentProfile!}
       junta={(Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas)!}
-      paidByMercadoPagoIds={(mercadoPagoDues ?? []).map((due) => due.profile_id)}
+      paidByMercadoPagoHouseholdIds={(mercadoPagoDues ?? []).flatMap((due) => due.household_id ? [due.household_id] : [])}
+      applications={applications ?? []}
     />
   );
 }

@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rate-limit';
 
 const manualDueSchema = z.object({
-  profileId: z.uuid(),
+  householdId: z.uuid(),
   action: z.enum(['paid', 'pending']),
   method: z.enum(['cash', 'transfer', 'other']).optional(),
 }).refine((value) => value.action === 'pending' || Boolean(value.method), { message: 'Selecciona el medio de pago.' });
@@ -25,18 +25,18 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient();
-  const { data: target } = await admin.from('profiles').select('id, junta_id').eq('id', parsed.data.profileId).maybeSingle();
+  const { data: target } = await admin.from('households').select('id, junta_id').eq('id', parsed.data.householdId).maybeSingle();
   if (!target || target.junta_id !== currentProfile.junta_id) {
-    return NextResponse.json({ error: 'Integrante no encontrado en tu junta.' }, { status: 404 });
+    return NextResponse.json({ error: 'Domicilio no encontrado en tu junta.' }, { status: 404 });
   }
   const period = `${new Date().toISOString().slice(0, 7)}-01`;
-  const { data: due } = await admin.from('member_dues').select('status, mercadopago_payment_id').eq('profile_id', target.id).eq('period', period).maybeSingle();
+  const { data: due } = await admin.from('member_dues').select('status, mercadopago_payment_id').eq('household_id', target.id).eq('period', period).maybeSingle();
   if (due?.status === 'paid' && due.mercadopago_payment_id) {
     return NextResponse.json({ error: 'Esta cuota fue confirmada por Mercado Pago y está protegida contra cambios manuales.' }, { status: 409 });
   }
 
-  const { data: transactionId, error } = await admin.rpc('set_manual_member_due', {
-    p_profile_id: target.id,
+  const { data: transactionId, error } = await admin.rpc('set_manual_household_due', {
+    p_household_id: target.id,
     p_junta_id: currentProfile.junta_id,
     p_action: parsed.data.action,
     p_method: parsed.data.action === 'paid' ? parsed.data.method : null,

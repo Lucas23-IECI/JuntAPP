@@ -26,6 +26,12 @@ export default async function VotacionesPage() {
     .from('votes')
     .select('*');
 
+  const { data: proposals } = await supabase
+    .from('poll_proposals')
+    .select('*')
+    .eq('junta_id', profile?.junta_id)
+    .order('created_at', { ascending: false });
+
   // Enrich polls with vote counts and user vote status
   const enrichedPolls = (polls || []).map((poll) => {
     const pollVotes = (votes || []).filter(v => v.poll_id === poll.id);
@@ -43,6 +49,7 @@ export default async function VotacionesPage() {
     <VotacionesClient
       polls={enrichedPolls}
       currentProfile={profile!}
+      proposals={proposals ?? []}
     />
   );
 }

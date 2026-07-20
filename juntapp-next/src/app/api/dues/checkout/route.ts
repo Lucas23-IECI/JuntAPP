@@ -22,25 +22,26 @@ export async function POST(request: Request) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, junta_id, name, email, juntas(id, name, monthly_due_amount)')
+    .select('id, junta_id, household_id, name, email, address, juntas(id, name, monthly_due_amount)')
     .eq('id', user.id)
     .single();
   const junta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
-  if (!profile || !junta) return NextResponse.json({ error: 'Perfil o junta no encontrados.' }, { status: 404 });
+  if (!profile || !junta || !profile.household_id) return NextResponse.json({ error: 'Perfil, domicilio o junta no encontrados.' }, { status: 404 });
 
   try {
     const account = await getJuntaMercadoPagoAccount(profile.junta_id);
     if (!account) return NextResponse.json({ error: 'Tu junta todavía no conectó su cuenta de Mercado Pago.' }, { status: 409 });
     const period = `${new Date().toISOString().slice(0, 7)}-01`;
     const admin = createAdminClient();
-    const { data: existingDue } = await admin.from('member_dues').select('*').eq('profile_id', user.id).eq('period', period).maybeSingle();
-    if (existingDue?.status === 'paid') return NextResponse.json({ error: 'Tu cuota de este mes ya está pagada.' }, { status: 409 });
+    const { data: existingDue } = await admin.from('member_dues').select('*').eq('household_id', profile.household_id).eq('period', period).maybeSingle();
+    if (existingDue?.status === 'paid') return NextResponse.json({ error: 'La cuota de este domicilio ya está pagada.' }, { status: 409 });
     if (existingDue?.status === 'preference_created' && existingDue.checkout_url) {
       return NextResponse.json({ checkoutUrl: existingDue.checkout_url, dueId: existingDue.id });
     }
 
     const due = existingDue ?? (await admin.from('member_dues').insert({
       junta_id: profile.junta_id,
+      household_id: profile.household_id,
       profile_id: user.id,
       period,
       amount: junta.monthly_due_amount,
@@ -63,13 +64,13 @@ export async function POST(request: Request) {
         items: [{
           id: `due-${due.id}`,
           title: `Cuota vecinal ${period.slice(0, 7)} — ${junta.name}`,
-          description: `Cuota mensual de ${profile.name}`,
+          description: `Cuota mensual del domicilio ${profile.address}`,
           quantity: 1,
           currency_id: 'CLP',
           unit_price: Number(due.amount),
         }],
         payer: { email: profile.email },
-        external_reference: `juntapp-due:${due.id}:${profile.junta_id}:${user.id}`,
+        external_reference: `juntapp-due:${due.id}:${profile.junta_id}:${profile.household_id}`,
         back_urls: {
           success: `${appUrl}/api/dues/return?result=approved`,
           pending: `${appUrl}/api/dues/return?result=pending`,
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
         },
         ...(appUrl.startsWith('https://') ? { auto_return: 'approved' } : {}),
         statement_descriptor: 'JUNTAPP CUOTA',
-        metadata: { purpose: 'member_due', due_id: due.id, junta_id: profile.junta_id, profile_id: user.id },
+        metadata: { purpose: 'household_due', due_id: due.id, junta_id: profile.junta_id, household_id: profile.household_id, payer_profile_id: user.id },
         ...(webhookUrl ? { notification_url: webhookUrl } : {}),
       }),
       cache: 'no-store',

@@ -44,14 +44,17 @@ export async function POST(request: Request) {
 
   const { data: recipients, error: recipientsError } = await supabase
     .from('profiles')
-    .select('id, cuota_status')
+    .select('id, household_id')
     .eq('junta_id', profile.junta_id);
 
   if (recipientsError) {
     return NextResponse.json({ error: recipientsError.message }, { status: 500 });
   }
 
-  const rows = (recipients ?? []).filter((recipient) => !parsed.data.onlyPending || recipient.cuota_status === 'pendiente').map((recipient) => ({
+  const period = `${new Date().toISOString().slice(0, 7)}-01`;
+  const { data: paidDues } = parsed.data.onlyPending ? await supabase.from('member_dues').select('household_id').eq('junta_id', profile.junta_id).eq('period', period).eq('status', 'paid') : { data: [] };
+  const paidHouseholdIds = new Set((paidDues ?? []).map((due) => due.household_id));
+  const rows = (recipients ?? []).filter((recipient) => !parsed.data.onlyPending || !paidHouseholdIds.has(recipient.household_id)).map((recipient) => ({
     user_id: recipient.id,
     type: parsed.data.type,
     title: parsed.data.title,

@@ -54,6 +54,7 @@ export async function POST(request: Request) {
         phone: parsed.data.phone,
         junta_action: 'join',
         invite_code: junta.invite_code,
+        manual_invite: true,
       },
       redirectTo: process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/aceptar-invitacion` : undefined,
     });
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       const { error: roleError } = await admin.from('profiles').update({
         role: 'dirigente',
         board_position: parsed.data.boardPosition,
-        cuota_status: 'al_dia',
+        cuota_status: 'pendiente',
       }).eq('id', data.user.id).eq('junta_id', profile.junta_id);
       if (roleError) {
         await admin.auth.admin.deleteUser(data.user.id);

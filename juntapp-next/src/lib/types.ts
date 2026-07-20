@@ -5,7 +5,7 @@ export type BoardPosition = 'presidente' | 'secretario' | 'tesorero' | 'dirigent
 export type CuotaStatus = 'al_dia' | 'pendiente';
 export type TransactionType = 'ingreso' | 'egreso';
 export type AnnouncementCategory = 'urgente' | 'asamblea' | 'beneficio' | 'general';
-export type NotificationType = 'asamblea' | 'votacion' | 'cuota' | 'seguridad';
+export type NotificationType = 'asamblea' | 'votacion' | 'cuota' | 'seguridad' | 'registro' | 'propuesta';
 
 export interface Junta {
   id: string;
@@ -34,6 +34,7 @@ export interface Junta {
 export interface Profile {
   id: string;
   junta_id: string;
+  household_id: string;
   name: string;
   rut: string;
   address: string;
@@ -43,6 +44,33 @@ export interface Profile {
   board_position: BoardPosition | null;
   cuota_status: CuotaStatus;
   created_at: string;
+}
+
+export interface Household {
+  id: string;
+  junta_id: string;
+  address: string;
+  normalized_address: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type MembershipApplicationStatus = 'pending' | 'approved' | 'rejected' | 'activated';
+export interface MembershipApplication {
+  id: string;
+  junta_id: string;
+  name: string;
+  rut: string;
+  address: string;
+  phone: string;
+  email: string;
+  status: MembershipApplicationStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+  letter_delivery_status: 'pending' | 'sent' | 'in_app' | 'failed';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Transaction {
@@ -116,7 +144,8 @@ export type MemberDueStatus = 'pending' | 'preference_created' | 'paid' | 'rejec
 export interface MemberDue {
   id: string;
   junta_id: string;
-  profile_id: string;
+  household_id: string;
+  profile_id: string | null;
   period: string;
   amount: number;
   status: MemberDueStatus;
@@ -128,6 +157,23 @@ export interface MemberDue {
   refund_transaction_id: number | null;
   payment_source: 'mercadopago' | 'manual' | null;
   manual_payment_method: 'cash' | 'transfer' | 'other' | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PollProposalStatus = 'pending' | 'approved' | 'rejected';
+export interface PollProposal {
+  id: string;
+  junta_id: string;
+  proposed_by: string;
+  title: string;
+  description: string;
+  options: PollOption[];
+  status: PollProposalStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+  poll_id: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -27,7 +27,12 @@ let browser;
 const adminHeaders = { apikey: secretKey, 'User-Agent': 'JuntAPP-Server/1.0' };
 
 async function expectRoute(page, route, title) {
-  await page.locator(`#nav-${route}`).click();
+  const desktopNavigation = page.locator(`#nav-${route}`);
+  if (await desktopNavigation.isVisible()) {
+    await desktopNavigation.click();
+  } else {
+    await page.goto(`${new URL(page.url()).origin}/${route}`);
+  }
   await page.waitForURL(`**/${route}`);
   await page.locator('.view-title').waitFor({ state: 'visible' });
   assert((await page.locator('.view-title').textContent())?.includes(title), `Título incorrecto en /${route}`);
@@ -55,7 +60,12 @@ try {
   const consoleErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });
-  page.on('requestfailed', (request) => { if (request.url().startsWith('http://localhost:3000')) failedRequests.push(`${request.method()} ${request.url()} ${request.failure()?.errorText}`); });
+  page.on('requestfailed', (request) => {
+    const failure = request.failure()?.errorText;
+    if (request.url().startsWith('http://localhost:3000') && failure !== 'net::ERR_ABORTED') {
+      failedRequests.push(`${request.method()} ${request.url()} ${failure}`);
+    }
+  });
 
   await page.goto('http://localhost:3000/login');
   await page.locator('#email').fill(email);
@@ -135,7 +145,8 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await expectRoute(page, 'inicio', 'Panel de Inicio');
   assert(await page.locator('.mobile-header').isVisible(), 'El header móvil no aparece');
-  assert(await page.locator('.sidebar-nav').isVisible(), 'La navegación móvil no aparece');
+  await page.locator('.mobile-menu-toggle').click();
+  assert(await page.locator('.mobile-navigation-menu').isVisible(), 'La navegación móvil no aparece');
 
   await page.screenshot({ path: path.resolve('.test-artifacts/dashboard-mobile.png'), fullPage: true });
   assert(pageErrors.length === 0, `Errores del navegador: ${pageErrors.join(' | ')}`);

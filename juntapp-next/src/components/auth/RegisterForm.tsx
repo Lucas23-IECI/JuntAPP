@@ -86,10 +86,21 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan, init
       });
       const validation = await validationResponse.json();
       if (!validationResponse.ok) throw new Error(validation.error ?? 'No fue posible validar el registro.');
+
+      if (juntaAction === 'join') {
+        const requestResponse = await fetch('/api/registration/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, rut, address, phone, email, inviteCode: inviteCode.toUpperCase().trim() }),
+        });
+        const requestResult = await requestResponse.json();
+        if (!requestResponse.ok) throw new Error(requestResult.error ?? 'No fue posible enviar la solicitud.');
+        setSuccess(requestResult.message);
+        return;
+      }
       const supabase = createClient();
 
-      // Junta creation/joining is handled atomically by the database trigger.
-      // Invite codes never need to be exposed through a public SELECT policy.
+      // Joining requests returned above. This branch creates a new junta atomically.
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -99,13 +110,12 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan, init
             rut: cleanRUT(rut),
             address,
             phone,
-            junta_action: juntaAction,
-            invite_code: juntaAction === 'join' ? inviteCode.toUpperCase().trim() : undefined,
-            junta_name: juntaAction === 'create' ? juntaName.trim() : undefined,
-            junta_region: juntaAction === 'create' ? juntaRegion : undefined,
-            junta_comuna: juntaAction === 'create' ? juntaComuna.trim() : undefined,
-            subscription_plan: juntaAction === 'create' ? plan : undefined,
-            whatsapp_addon: juntaAction === 'create' ? whatsapp : undefined,
+            junta_action: 'create',
+            junta_name: juntaName.trim(),
+            junta_region: juntaRegion,
+            junta_comuna: juntaComuna.trim(),
+            subscription_plan: plan,
+            whatsapp_addon: whatsapp,
           },
         },
       });
@@ -113,20 +123,13 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan, init
       if (authError) throw authError;
 
       if (!data.session) {
-        setSuccess(juntaAction === 'create'
-          ? 'Cuenta creada. Confirma tu correo e inicia sesión para autorizar la suscripción mensual.'
-          : 'Registro completado. Revisa tu correo para confirmar la cuenta antes de ingresar.');
+        setSuccess('Cuenta creada. Confirma tu correo e inicia sesión para autorizar la suscripción mensual.');
         return;
       }
 
-      if (juntaAction === 'create') {
-        router.push('/registro/pago');
-        router.refresh();
-        return;
-      }
-
-      router.push('/inicio');
+      router.push('/registro/pago');
       router.refresh();
+
     } catch (err: unknown) {
       const rawMessage = err instanceof Error ? err.message : 'Error en el registro.';
       const message = rawMessage.toLowerCase().includes('database error saving new user')
@@ -306,7 +309,7 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan, init
             placeholder="ABC123"
           />
           <p className="form-help">
-            Solicita este código al dirigente de tu Junta de Vecinos.
+            La solicitud será enviada a Secretaría con copia a toda la directiva. No podrás ingresar hasta que Secretaría la apruebe.
           </p>
         </div>
       ) : (
@@ -365,7 +368,7 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan, init
           disabled={loading}
           className="btn btn-primary btn-grow"
         >
-          {loading ? 'Registrando...' : juntaAction === 'create' ? 'Continuar a la suscripción mensual' : 'Unirme y Registrarme'}
+          {loading ? 'Enviando...' : juntaAction === 'create' ? 'Continuar a la suscripción mensual' : 'Enviar solicitud a Secretaría'}
         </button>
       </div>
     </form>

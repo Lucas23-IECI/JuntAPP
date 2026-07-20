@@ -33,18 +33,18 @@ export async function processMemberDuePayment(paymentId: string, mercadoPagoUser
 
   const reference = payment.external_reference?.match(/^juntapp-due:([0-9a-f-]{36}):([0-9a-f-]{36}):([0-9a-f-]{36})$/i);
   if (!reference) return false;
-  const [, dueId, juntaId, profileId] = reference;
+  const [, dueId, juntaId, householdId] = reference;
   if (juntaId !== connection.junta_id || Number(payment.collector_id) !== Number(connection.mercadopago_user_id)) {
     throw new Error('El pago pertenece a otra junta o cuenta recaudadora.');
   }
 
   const { data: due, error: dueError } = await admin
     .from('member_dues')
-    .select('id, junta_id, profile_id, amount, status, mercadopago_payment_id')
+    .select('id, junta_id, household_id, profile_id, amount, status, mercadopago_payment_id')
     .eq('id', dueId)
     .single();
-  if (dueError || !due || due.junta_id !== juntaId || due.profile_id !== profileId) {
-    throw new Error('No se encontró la cuota asociada al pago.');
+  if (dueError || !due || due.junta_id !== juntaId || due.household_id !== householdId) {
+    throw new Error('No se encontró la cuota por domicilio asociada al pago.');
   }
   if (payment.currency_id !== 'CLP' || Number(payment.transaction_amount) !== Number(due.amount)) {
     throw new Error('El monto o moneda no coincide con la cuota registrada.');

@@ -35,6 +35,8 @@ npx supabase db push
 - `MERCADOPAGO_CREDENTIALS_ENCRYPTION_KEY`: secreto aleatorio de 32 caracteres o más para cifrar Access y Refresh Tokens por junta.
 - `MERCADOPAGO_OAUTH_TEST_MODE`: usa `true` en sandbox y `false` en producción.
 - `MERCADOPAGO_WEBHOOK_SECRET`: firma secreta configurada en Webhooks de Mercado Pago para producción.
+- `RESEND_API_KEY`: credencial privada de Resend para enviar la carta de solicitud a Secretaría.
+- `REGISTRATION_EMAIL_FROM`: remitente verificado, por ejemplo `JuntAPP <solicitudes@tu-dominio.cl>`.
 
 Nunca expongas `SUPABASE_SERVICE_ROLE_KEY` con el prefijo `NEXT_PUBLIC_`.
 
@@ -42,13 +44,19 @@ Las juntas nuevas permanecen pendientes hasta que Mercado Pago autoriza la suscr
 
 En Mercado Pago configura `/api/webhooks/mercadopago` y activa los eventos de planes y suscripciones. La suscripción puede cancelarse desde Registro de Socios por quien creó la junta.
 
-## Registro autónomo por código
+## Solicitudes de ingreso y registro manual
 
-Cada junta tiene un `invite_code` único de seis caracteres. La directiva puede copiar desde Registro de Socios un enlace como `https://tu-dominio/registro?codigo=ABC123`; el vecino completa su registro y el trigger de Supabase lo asocia únicamente a esa junta. No requiere invitaciones masivas por correo.
+Cada junta tiene un `invite_code` único de seis caracteres. El enlace `https://tu-dominio/registro?codigo=ABC123` crea una solicitud pendiente, no una cuenta. Se envía una carta a Secretaría con copia por correo a toda la directiva y siempre queda una copia dentro del dashboard. Solo quien ocupa el cargo de Secretario puede aceptar o rechazar. Al aceptar, Supabase envía la invitación para que el socio active su contraseña; antes de eso no puede ingresar. La directiva también puede inscribir socios manualmente desde Registro de Socios, sin solicitud previa.
+
+Si Resend no está configurado o rechaza un envío, la solicitud no se pierde: queda marcada en la bandeja de toda la directiva para su resolución.
 
 ## Cobro de cuotas con la cuenta de cada junta
 
-Presidencia conecta la cuenta Mercado Pago de la junta desde Tesorería usando OAuth con PKCE. Los tokens quedan cifrados en `mercadopago_junta_accounts` y no son accesibles para clientes autenticados. Presidencia o Tesorería definen el monto mensual; cada vecino recibe una preferencia individual y el pago aprobado crea automáticamente el ingreso en el libro de caja.
+Presidencia conecta la cuenta Mercado Pago de la junta desde Tesorería usando OAuth con PKCE. Los tokens quedan cifrados en `mercadopago_junta_accounts` y no son accesibles para clientes autenticados. Presidencia o Tesorería definen el monto mensual por domicilio. Todos los socios que comparten una dirección usan la misma cuota mensual: un pago deja al día al hogar completo y crea un único ingreso auditable en el libro de caja. Pagos manuales, reembolsos, rechazos y webhooks de Mercado Pago conservan la misma asociación al domicilio.
+
+## Propuestas de votación
+
+Los socios pueden enviar propuestas con contexto y alternativas. La propuesta permanece pendiente y solo se convierte en una votación activa cuando la directiva la aprueba. Los rechazos exigen un motivo y tanto la revisión como la votación resultante quedan vinculadas para auditoría.
 
 En la aplicación de Mercado Pago registra exactamente esta URL de redirección:
 

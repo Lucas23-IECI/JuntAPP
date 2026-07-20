@@ -29,7 +29,7 @@ export default async function TesoreriaPage({ searchParams }: { searchParams: Pr
   const { data: currentDue } = await supabase
     .from('member_dues')
     .select('*')
-    .eq('profile_id', user!.id)
+    .eq('household_id', profile?.household_id)
     .eq('period', period)
     .maybeSingle();
   const { data: mercadoPagoAccount } = profile ? await createAdminClient()
@@ -39,10 +39,17 @@ export default async function TesoreriaPage({ searchParams }: { searchParams: Pr
     .maybeSingle() : { data: null };
   const params = await searchParams;
 
-  const { data: memberStatuses } = await supabase
-    .from('profiles')
-    .select('cuota_status')
+  const { data: households } = await supabase
+    .from('households')
+    .select('id')
     .eq('junta_id', profile?.junta_id);
+  const { data: paidHouseholdDues } = await supabase
+    .from('member_dues')
+    .select('household_id')
+    .eq('junta_id', profile?.junta_id)
+    .eq('period', period)
+    .eq('status', 'paid')
+    .not('household_id', 'is', null);
 
   const { data: files } = await supabase.storage
     .from('transparency_reports')
@@ -75,8 +82,8 @@ export default async function TesoreriaPage({ searchParams }: { searchParams: Pr
         connectedAt: mercadoPagoAccount?.connected_at ?? null,
         oauthConfigured: mercadoPagoConnectConfigured(),
       }}
-      totalMembers={memberStatuses?.length ?? 0}
-      paidMembers={memberStatuses?.filter((member) => member.cuota_status === 'al_dia').length ?? 0}
+      totalHouseholds={households?.length ?? 0}
+      paidHouseholds={new Set((paidHouseholdDues ?? []).map((due) => due.household_id)).size}
     />
   );
 }
