@@ -1,7 +1,8 @@
 -- Local development data
--- Password for all demo users: password123
+-- Board demo password: password123
+-- Neighbor demo password: VecinoDemo2026!
 
-INSERT INTO public.juntas (id, name, slug, address, comuna, region, invite_code)
+INSERT INTO public.juntas (id, name, slug, address, comuna, region, invite_code, subscription_status, subscription_price)
 VALUES (
     'd5089e9f-9694-4d87-8d26-384196c80000',
     'Junta de Vecinos Villa Los Jardines',
@@ -9,7 +10,9 @@ VALUES (
     'Sede Comunitaria 10',
     'Viña del Mar',
     'Valparaíso',
-    'DEMO26'
+    'DEMO26',
+    'authorized',
+    14990
 );
 
 -- Creating auth users fires handle_new_user(), which validates DEMO26 and creates profiles.
@@ -26,7 +29,7 @@ VALUES
     '$2a$10$yFfJ3NpeNlEuxmK2DkC/lO0zXpG5p1Y.hP6j24dK4f9FfGjH69g.a',
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"name":"Vecina Presidenta (Admin)","rut":"12.345.678-9","address":"Pasaje Los Aromos 110","phone":"+56 9 1111 1111","junta_action":"join","invite_code":"DEMO26"}',
+    '{"name":"Vecina Presidenta (Admin)","rut":"12.345.678-9","address":"Pasaje Los Aromos 110","phone":"+56 9 1111 1111","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
     false, 'authenticated', now(), now(), now()
 ),
 (
@@ -36,7 +39,7 @@ VALUES
     '$2a$10$yFfJ3NpeNlEuxmK2DkC/lO0zXpG5p1Y.hP6j24dK4f9FfGjH69g.a',
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"name":"Luis Humberto Muñoz Henríquez","rut":"8.122.904-7","address":"Calle Principal 1024","phone":"+56 9 5432 1098","junta_action":"join","invite_code":"DEMO26"}',
+    '{"name":"Luis Humberto Muñoz Henríquez","rut":"8.122.904-7","address":"Calle Principal 1024","phone":"+56 9 5432 1098","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
     false, 'authenticated', now(), now(), now()
 ),
 (
@@ -46,7 +49,7 @@ VALUES
     '$2a$10$yFfJ3NpeNlEuxmK2DkC/lO0zXpG5p1Y.hP6j24dK4f9FfGjH69g.a',
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"name":"María José Ramírez Valdés","rut":"14.341.203-K","address":"Pasaje Los Aromos 345","phone":"+56 9 8765 4321","junta_action":"join","invite_code":"DEMO26"}',
+    '{"name":"María José Ramírez Valdés","rut":"14.341.203-K","address":"Pasaje Los Aromos 345","phone":"+56 9 8765 4321","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
     false, 'authenticated', now(), now(), now()
 ),
 (
@@ -56,7 +59,72 @@ VALUES
     '$2a$10$yFfJ3NpeNlEuxmK2DkC/lO0zXpG5p1Y.hP6j24dK4f9FfGjH69g.a',
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"name":"Pedro Ignacio Soto Contreras","rut":"9.403.220-4","address":"Avenida Los Girasoles 120","phone":"+56 9 7654 3210","junta_action":"join","invite_code":"DEMO26"}',
+    '{"name":"Pedro Ignacio Soto Contreras","rut":"9.403.220-4","address":"Avenida Los Girasoles 120","phone":"+56 9 7654 3210","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
+);
+
+-- Eight neighbors represented by four households. Each pair intentionally uses
+-- a different textual spelling of the same address to exercise normalization.
+INSERT INTO auth.users (
+    id, instance_id, email, encrypted_password, email_confirmed_at,
+    raw_app_meta_data, raw_user_meta_data, is_super_admin, role,
+    created_at, updated_at, last_sign_in_at
+)
+VALUES
+(
+    'd5089e9f-9694-4d87-8d26-384196c80010', '00000000-0000-0000-0000-000000000000',
+    'vecino.demo@juntapp.cl', extensions.crypt('VecinoDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Camila Rojas Fuentes","rut":"171234565","address":"Avenida Los Pinos 123, Depto 4","phone":"+56 9 2100 1001","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
+),
+(
+    'd5089e9f-9694-4d87-8d26-384196c80011', '00000000-0000-0000-0000-000000000000',
+    'tomas.demo@juntapp.cl', extensions.crypt('VecinoDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Tomás Rojas Fuentes","rut":"182345679","address":"Av. Los Pinos #123 Dpto. 4","phone":"+56 9 2100 1002","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
+),
+(
+    'd5089e9f-9694-4d87-8d26-384196c80012', '00000000-0000-0000-0000-000000000000',
+    'ana.demo@juntapp.cl', extensions.crypt('VecinoDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Ana Morales Díaz","rut":"193456782","address":"Pasaje Los Aromos 345","phone":"+56 9 2100 1003","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
+),
+(
+    'd5089e9f-9694-4d87-8d26-384196c80013', '00000000-0000-0000-0000-000000000000',
+    'juan.demo@juntapp.cl', extensions.crypt('VecinoDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Juan Morales Díaz","rut":"204567891","address":"Pje. Los Aromos Nro. 345","phone":"+56 9 2100 1004","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
+),
+(
+    'd5089e9f-9694-4d87-8d26-384196c80014', '00000000-0000-0000-0000-000000000000',
+    'carolina.demo@juntapp.cl', extensions.crypt('VecinoDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Carolina Pérez Soto","rut":"155678909","address":"Calle Las Acacias 880","phone":"+56 9 2100 1005","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
+),
+(
+    'd5089e9f-9694-4d87-8d26-384196c80015', '00000000-0000-0000-0000-000000000000',
+    'diego.demo@juntapp.cl', extensions.crypt('VecinoDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Diego Pérez Soto","rut":"16678901K","address":"Calle Las Acacias #880","phone":"+56 9 2100 1006","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
+),
+(
+    'd5089e9f-9694-4d87-8d26-384196c80016', '00000000-0000-0000-0000-000000000000',
+    'elena.demo@juntapp.cl', extensions.crypt('VecinoDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Elena Contreras Silva","rut":"137890127","address":"Camino El Sol 72","phone":"+56 9 2100 1007","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
+),
+(
+    'd5089e9f-9694-4d87-8d26-384196c80017', '00000000-0000-0000-0000-000000000000',
+    'roberto.demo@juntapp.cl', extensions.crypt('VecinoDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Roberto Contreras Silva","rut":"148901236","address":"Cno. El Sol N° 72","phone":"+56 9 2100 1008","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
     false, 'authenticated', now(), now(), now()
 );
 
@@ -69,6 +137,15 @@ SET cuota_status = 'al_dia'
 WHERE id IN (
     'd5089e9f-9694-4d87-8d26-384196c80003',
     'd5089e9f-9694-4d87-8d26-384196c80004'
+);
+
+-- One current-period charge for the shared Los Pinos household. Both demo
+-- neighbors become current through the same address-level payment.
+SELECT public.set_manual_household_due(
+    (SELECT household_id FROM public.profiles WHERE email = 'vecino.demo@juntapp.cl'),
+    'd5089e9f-9694-4d87-8d26-384196c80000',
+    'paid',
+    'transfer'
 );
 
 INSERT INTO public.transactions (junta_id, type, description, amount, date, created_by)

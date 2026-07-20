@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "brand:generate": "node scripts/generate-brand-assets.mjs",
+    "demo:neighbors": "node scripts/seed-demo-neighbors.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

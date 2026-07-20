@@ -2,7 +2,9 @@ DO $$
 DECLARE demo_id UUID;
 BEGIN
   SELECT id INTO demo_id FROM public.profiles WHERE email = 'admin@juntapp.cl' LIMIT 1;
-  IF demo_id IS NULL THEN RAISE EXCEPTION 'Demo profile not found'; END IF;
+  -- On a clean `supabase db reset` demo users are inserted later by seed.sql.
+  -- Existing cloud projects still receive the identity repair.
+  IF demo_id IS NULL THEN RETURN; END IF;
   UPDATE auth.users SET
     email = 'admin@juntapp.cl',
     encrypted_password = extensions.crypt('password123', extensions.gen_salt('bf')),

@@ -15,6 +15,19 @@ npm run dev
 
 La aplicación queda disponible en `http://localhost:3000`.
 
+## Cuentas demo
+
+- Directiva: `admin@juntapp.cl` / `password123`
+- Vecino: `vecino.demo@juntapp.cl` / `VecinoDemo2026!`
+
+El vecino demo comparte `Avenida Los Pinos 123, Depto 4` con otro socio. Ambos están asociados a una sola cuota mensual por domicilio. Para crear o reparar los ocho vecinos demo de forma idempotente en el Supabase configurado:
+
+```bash
+npm run demo:neighbors
+```
+
+El comando comprueba que las ocho variantes de texto formen cuatro domicilios, registra un solo pago para Los Pinos y falla si detecta cuotas o direcciones duplicadas.
+
 Este proyecto está conectado directamente a Supabase Cloud. Para aplicar migraciones, ejecuta desde `../backend`:
 
 ```bash
@@ -53,6 +66,8 @@ Si Resend no está configurado o rechaza un envío, la solicitud no se pierde: q
 ## Cobro de cuotas con la cuenta de cada junta
 
 Presidencia conecta la cuenta Mercado Pago de la junta desde Tesorería usando OAuth con PKCE. Los tokens quedan cifrados en `mercadopago_junta_accounts` y no son accesibles para clientes autenticados. Presidencia o Tesorería definen el monto mensual por domicilio. Todos los socios que comparten una dirección usan la misma cuota mensual: un pago deja al día al hogar completo y crea un único ingreso auditable en el libro de caja. Pagos manuales, reembolsos, rechazos y webhooks de Mercado Pago conservan la misma asociación al domicilio.
+
+Las direcciones se normalizan dentro de PostgreSQL antes de asignar el domicilio. Se ignoran mayúsculas, tildes, puntuación, espacios, símbolos de número y variantes habituales como `Avenida`/`Av.`, `Pasaje`/`Pje.`, `Departamento`/`Dpto.` o `Camino`/`Cno.`. Una restricción única evita duplicados aun bajo solicitudes concurrentes y un trigger impide asociar manualmente un socio a un domicilio incompatible con su dirección.
 
 ## Propuestas de votación
 
