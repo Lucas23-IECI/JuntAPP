@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { Junta, Notification, Profile } from '@/lib/types';
@@ -43,15 +44,20 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const unreadCount = notifications.filter((notification) => !notification.read).length;
-  const visibleNavigation = navigation.filter((item) => item.route === 'mi-pagina' ? ['web','juntapp_web'].includes(junta?.subscription_plan ?? '') : junta?.subscription_plan !== 'web');
+  const hasWebsitePlan = ['web', 'juntapp_web'].includes(junta?.subscription_plan ?? '');
+  const visibleNavigation = navigation
+    .filter((item) => item.route === 'mi-pagina' ? hasWebsitePlan : junta?.subscription_plan !== 'web')
+    .map((item) => item.route === 'mi-pagina' && profile.role === 'vecino'
+      ? { ...item, label: 'Web de la Junta', href: `/sitio/${junta?.slug}` }
+      : { ...item, href: `/${item.route}` });
 
   useEffect(() => {
-    if (junta?.subscription_plan === 'web' && pathname !== '/mi-pagina') router.replace('/mi-pagina');
+    if (profile.role === 'dirigente' && junta?.subscription_plan === 'web' && pathname !== '/mi-pagina') router.replace('/mi-pagina');
     const supabase = createClient();
     void supabase.from('notifications').select('*').eq('user_id', profile.id).order('date', { ascending: false }).limit(10).then(({ data }) => setNotifications(data ?? []));
     const channel = supabase.channel(`notifications:${profile.id}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${profile.id}` }, (payload) => setNotifications((current) => [payload.new as Notification, ...current].slice(0, 10))).subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [junta?.subscription_plan, pathname, profile.id, router]);
+  }, [junta?.subscription_plan, pathname, profile.id, profile.role, router]);
 
   function toggleCollapsed() {
     setCollapsed((value) => { localStorage.setItem('juntapp_sidebar_collapsed', String(!value)); return !value; });
@@ -101,7 +107,7 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
           <div className="sidebar-profile-meta"><span id="userProfileRut">RUT: {profile.rut}</span><button id="btnLogoutBtn" onClick={logout}>Cerrar Sesión</button></div>
         </div>
         <nav className="sidebar-nav" aria-label="Navegación del panel">
-          {visibleNavigation.map((item) => <button type="button" aria-label={item.label} title={item.label} className={`nav-item ${currentRoute === item.route ? 'active' : ''}`} id={`nav-${item.route}`} data-view={item.route} key={item.route} onClick={() => router.push(`/${item.route}`)}><NavIcon icon={item.icon}/><span>{item.label}</span>{item.route === 'comunicaciones' && unreadCount > 0 && <span className="badge badge-accent">{unreadCount}</span>}</button>)}
+          {visibleNavigation.map((item) => <Link href={item.href} aria-label={item.label} title={item.label} className={`nav-item ${currentRoute === item.route ? 'active' : ''}`} id={`nav-${item.route}`} data-view={item.route} key={item.route}><NavIcon icon={item.icon}/><span>{item.label}</span>{item.route === 'comunicaciones' && unreadCount > 0 && <span className="badge badge-accent">{unreadCount}</span>}</Link>)}
         </nav>
         <div className="sidebar-footer">
           <button className="theme-btn notifications-bell-btn" id="bellToggle" onClick={() => setNotificationsOpen((value) => !value)}><span className="bell-icon-wrapper"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</span><span>Notificaciones</span></button>
@@ -112,7 +118,7 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
       </aside>
       <main className="app-main-content" id="mainContent">
         <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button><button className="mobile-menu-toggle" type="button" aria-label={mobileMenuOpen?'Cerrar menú':'Abrir menú'} aria-expanded={mobileMenuOpen} onClick={()=>setMobileMenuOpen((value)=>!value)}><span/><span/><span/></button></div></header>
-        {mobileMenuOpen&&<div className="mobile-navigation-menu" role="navigation" aria-label="Menú principal">{visibleNavigation.map((item)=><button type="button" className={currentRoute===item.route?'active':''} key={item.route} onClick={()=>{setMobileMenuOpen(false);router.push(`/${item.route}`)}}><NavIcon icon={item.icon}/><span>{item.label}</span></button>)}<div className="mobile-menu-secondary"><button type="button" onClick={toggleTheme}>{dark?'Modo claro':'Modo oscuro'}</button><button type="button" className="logout" onClick={logout}>Cerrar sesión</button></div></div>}
+        {mobileMenuOpen&&<div className="mobile-navigation-menu" role="navigation" aria-label="Menú principal">{visibleNavigation.map((item)=><Link href={item.href} className={`mobile-navigation-link ${currentRoute===item.route?'active':''}`} key={item.route} onClick={()=>setMobileMenuOpen(false)}><NavIcon icon={item.icon}/><span>{item.label}</span></Link>)}<div className="mobile-menu-secondary"><button type="button" onClick={toggleTheme}>{dark?'Modo claro':'Modo oscuro'}</button><button type="button" className="logout" onClick={logout}>Cerrar sesión</button></div></div>}
         {children}
       </main>
     </div>

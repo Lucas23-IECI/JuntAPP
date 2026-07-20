@@ -1,5 +1,6 @@
 -- Local development data
--- Board demo password: password123
+-- Legacy board demo password: password123
+-- Current board demo password: DirectivaDemo2026!
 -- Neighbor demo password: VecinoDemo2026!
 
 INSERT INTO public.juntas (id, name, slug, address, comuna, region, invite_code, subscription_status, subscription_price)
@@ -126,6 +127,13 @@ VALUES
     '{"provider":"email","providers":["email"]}',
     '{"name":"Roberto Contreras Silva","rut":"148901236","address":"Cno. El Sol N° 72","phone":"+56 9 2100 1008","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
     false, 'authenticated', now(), now(), now()
+),
+(
+    'd5089e9f-9694-4d87-8d26-384196c80018', '00000000-0000-0000-0000-000000000000',
+    'directiva.demo@juntapp.cl', extensions.crypt('DirectivaDemo2026!', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Administración Demo","rut":"126543212","address":"Sede Vecinal 10","phone":"+56 9 2100 1099","junta_action":"join","invite_code":"DEMO26","manual_invite":true}',
+    false, 'authenticated', now(), now(), now()
 );
 
 UPDATE public.profiles
@@ -138,6 +146,10 @@ WHERE id IN (
     'd5089e9f-9694-4d87-8d26-384196c80003',
     'd5089e9f-9694-4d87-8d26-384196c80004'
 );
+
+UPDATE public.profiles
+SET role = 'dirigente', board_position = 'dirigente', cuota_status = 'al_dia'
+WHERE id = 'd5089e9f-9694-4d87-8d26-384196c80018';
 
 -- One current-period charge for the shared Los Pinos household. Both demo
 -- neighbors become current through the same address-level payment.

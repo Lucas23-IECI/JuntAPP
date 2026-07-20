@@ -5,6 +5,7 @@
   "scripts": {
     "brand:generate": "node scripts/generate-brand-assets.mjs",
     "demo:neighbors": "node scripts/seed-demo-neighbors.mjs",
+    "smoke:demo-navigation": "node scripts/smoke-demo-navigation.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

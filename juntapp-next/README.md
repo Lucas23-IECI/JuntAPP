@@ -17,7 +17,7 @@ La aplicación queda disponible en `http://localhost:3000`.
 
 ## Cuentas demo
 
-- Directiva: `admin@juntapp.cl` / `password123`
+- Directiva: `directiva.demo@juntapp.cl` / `DirectivaDemo2026!`
 - Vecino: `vecino.demo@juntapp.cl` / `VecinoDemo2026!`
 
 El vecino demo comparte `Avenida Los Pinos 123, Depto 4` con otro socio. Ambos están asociados a una sola cuota mensual por domicilio. Para crear o reparar los ocho vecinos demo de forma idempotente en el Supabase configurado:

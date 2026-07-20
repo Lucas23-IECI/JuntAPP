@@ -116,6 +116,7 @@
   transition: color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
   width: 100%;
   position: relative;
+  text-decoration: none;
 }
 
 .nav-item svg {

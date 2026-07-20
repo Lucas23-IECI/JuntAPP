@@ -21,6 +21,8 @@ function rutFrom(body) {
 }
 
 const DEMO_PASSWORD = 'VecinoDemo2026!';
+const BOARD_DEMO_EMAIL = 'directiva.demo@juntapp.cl';
+const BOARD_DEMO_PASSWORD = 'DirectivaDemo2026!';
 const neighbors = [
   { email: 'vecino.demo@juntapp.cl', name: 'Camila Rojas Fuentes', rut: rutFrom('17123456'), address: 'Avenida Los Pinos 123, Depto 4', phone: '+56 9 2100 1001' },
   { email: 'tomas.demo@juntapp.cl', name: 'Tomás Rojas Fuentes', rut: rutFrom('18234567'), address: 'Av. Los Pinos #123 Dpto. 4', phone: '+56 9 2100 1002' },
@@ -44,6 +46,43 @@ const { data: demoAdmin, error: adminError } = await admin.from('profiles')
 if (adminError || !demoAdmin) throw adminError ?? new Error('No existe la cuenta administradora demo.');
 const junta = Array.isArray(demoAdmin.juntas) ? demoAdmin.juntas[0] : demoAdmin.juntas;
 if (!junta?.invite_code || junta.subscription_status !== 'authorized') throw new Error('La junta demo no está activa o no tiene código.');
+
+const boardMetadata = {
+  name: 'Administración Demo',
+  rut: rutFrom('12654321'),
+  address: 'Sede Vecinal 10',
+  phone: '+56 9 2100 1099',
+  junta_action: 'join',
+  invite_code: junta.invite_code,
+  manual_invite: true,
+};
+const { data: existingBoardProfile } = await admin.from('profiles').select('id').eq('email', BOARD_DEMO_EMAIL).maybeSingle();
+if (existingBoardProfile) {
+  const { error: boardAuthError } = await admin.auth.admin.updateUserById(existingBoardProfile.id, {
+    password: BOARD_DEMO_PASSWORD,
+    email_confirm: true,
+    user_metadata: boardMetadata,
+  });
+  if (boardAuthError) throw boardAuthError;
+} else {
+  const { error: boardCreateError } = await admin.auth.admin.createUser({
+    email: BOARD_DEMO_EMAIL,
+    password: BOARD_DEMO_PASSWORD,
+    email_confirm: true,
+    user_metadata: boardMetadata,
+  });
+  if (boardCreateError) throw boardCreateError;
+}
+const { error: boardProfileError } = await admin.from('profiles').update({
+  name: boardMetadata.name,
+  rut: boardMetadata.rut,
+  address: boardMetadata.address,
+  phone: boardMetadata.phone,
+  role: 'dirigente',
+  board_position: 'dirigente',
+  cuota_status: 'al_dia',
+}).eq('email', BOARD_DEMO_EMAIL).eq('junta_id', demoAdmin.junta_id);
+if (boardProfileError) throw boardProfileError;
 
 for (const neighbor of neighbors) {
   const { data: existingProfile } = await admin.from('profiles').select('id').eq('email', neighbor.email).maybeSingle();
@@ -147,5 +186,6 @@ console.log(JSON.stringify({
   uniqueHouseholds: new Set(seededProfiles.map((profile) => profile.household_id)).size,
   paidHouseholdMembers: paidMembers.length,
   currentDueRows: dues.length,
+  boardLogin: { email: BOARD_DEMO_EMAIL, password: BOARD_DEMO_PASSWORD },
   demoLogin: { email: 'vecino.demo@juntapp.cl', password: DEMO_PASSWORD },
 }, null, 2));
