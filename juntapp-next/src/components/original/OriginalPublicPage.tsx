@@ -47,9 +47,17 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
     : view ? originalFragments[view].replace('class="corporate-view"', 'class="corporate-view active"') : '';
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    scrollToTop();
+    requestAnimationFrame(scrollToTop);
+    const timer = setTimeout(scrollToTop, 50);
     document.body.classList.add('logged-out', 'style-swiss');
     document.body.classList.remove('logged-in', 'role-vecino', 'role-dirigente');
     const root = rootRef.current;
@@ -226,6 +234,7 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
     });
 
     return () => {
+      clearTimeout(timer);
       cleanups.forEach((cleanup) => cleanup());
       delete root.dataset.publicReady;
       document.body.classList.remove('logged-out');

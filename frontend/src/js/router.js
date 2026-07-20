@@ -10,6 +10,11 @@ export class Router {
   }
 
   init() {
+    // Desactiva la restauración automática del scroll del navegador al ir atrás/adelante
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
     // Escucha navegación con botones atrás/adelante
     window.addEventListener("popstate", () => this.handleRouting());
 
@@ -118,14 +123,18 @@ export class Router {
       });
     }
 
-    // Scroll to top when navigating
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    const mainContent = document.getElementById("mainContent");
-    if (mainContent) {
-      mainContent.scrollTop = 0;
-    }
+    // Scroll al inicio absoluto en toda navegación o movimiento en el historial (atrás/adelante)
+    const forceScrollTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const mainContent = document.getElementById("mainContent");
+      if (mainContent) mainContent.scrollTop = 0;
+    };
+
+    forceScrollTop();
+    requestAnimationFrame(forceScrollTop);
+    setTimeout(forceScrollTop, 50);
 
 
     // Remove initial FOUC bypass style to allow normal navigation
