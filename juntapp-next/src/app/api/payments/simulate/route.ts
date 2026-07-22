@@ -7,6 +7,10 @@ import { rateLimit } from '@/lib/rate-limit';
 const paymentSchema = z.object({ method: z.enum(['webpay', 'transfer', 'digital']) });
 
 export async function POST(request: Request) {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json({ error: 'No encontrado' }, { status: 404 });
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });

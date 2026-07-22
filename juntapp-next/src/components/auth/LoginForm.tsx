@@ -9,6 +9,8 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoveryMessage, setRecoveryMessage] = useState('');
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -38,6 +40,30 @@ export default function LoginForm() {
       setError('Error de conexión. Intenta nuevamente.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function recoverPassword() {
+    setError('');
+    setRecoveryMessage('');
+    if (!email.trim()) {
+      setError('Ingresa tu correo para recuperar la contraseña.');
+      return;
+    }
+    setRecoveryLoading(true);
+    try {
+      const response = await fetch('/api/auth/recover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? 'No fue posible solicitar la recuperación.');
+      setRecoveryMessage(result.message);
+    } catch (recoveryError) {
+      setError(recoveryError instanceof Error ? recoveryError.message : 'No fue posible solicitar la recuperación.');
+    } finally {
+      setRecoveryLoading(false);
     }
   }
 
@@ -78,12 +104,17 @@ export default function LoginForm() {
         <div className="auth-error-message">{error}</div>
       )}
 
+      {recoveryMessage && <p className="form-help">{recoveryMessage}</p>}
+
       <button
         type="submit"
         disabled={loading}
         className="btn btn-primary btn-block btn-lg"
       >
         {loading ? 'Ingresando...' : 'Ingresar'}
+      </button>
+      <button type="button" className="btn btn-ghost btn-block" disabled={loading || recoveryLoading} onClick={() => void recoverPassword()}>
+        {recoveryLoading ? 'Enviando enlace…' : '¿Olvidaste tu contraseña?'}
       </button>
     </form>
   );

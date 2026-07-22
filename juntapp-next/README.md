@@ -63,6 +63,12 @@ Cada junta tiene un `invite_code` único de seis caracteres. El enlace `https://
 
 Si Resend no está configurado o rechaza un envío, la solicitud no se pierde: queda marcada en la bandeja de toda la directiva para su resolución.
 
+## Correos transaccionales
+
+Resend envía desde el servidor las solicitudes de ingreso, invitaciones aprobadas, rechazos, recuperación de contraseña, recordatorios de cuota, comprobantes y estados de pago, además de renovaciones aceptadas o rechazadas. Los envíos originados por webhooks usan claves de idempotencia para evitar duplicados.
+
+La confirmación inicial de correo al crear una junta pertenece a Supabase Auth. Su plantilla versionada está en `../backend/supabase/templates/confirmation.html`; debe mantenerse sincronizada con la plantilla **Confirm signup** del proyecto alojado en Supabase. Las plantillas locales de invitación y recuperación sirven como respaldo, aunque la aplicación genera esos enlaces seguros con Supabase y entrega los correos por Resend.
+
 ## Cobro de cuotas con la cuenta de cada junta
 
 Presidencia conecta la cuenta Mercado Pago de la junta desde Tesorería usando OAuth con PKCE. Los tokens quedan cifrados en `mercadopago_junta_accounts` y no son accesibles para clientes autenticados. Presidencia o Tesorería definen el monto mensual por domicilio. Todos los socios que comparten una dirección usan la misma cuota mensual: un pago deja al día al hogar completo y crea un único ingreso auditable en el libro de caja. Pagos manuales, reembolsos, rechazos y webhooks de Mercado Pago conservan la misma asociación al domicilio.

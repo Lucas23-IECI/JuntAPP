@@ -1,6 +1,8 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getJuntaMercadoPagoAccount } from '@/lib/mercadopago-connect';
+import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
+import { duePaymentTemplate } from '@/lib/email-templates';
 
 type MercadoPagoPayment = {
   id: number;
@@ -40,7 +42,7 @@ export async function processMemberDuePayment(paymentId: string, mercadoPagoUser
 
   const { data: due, error: dueError } = await admin
     .from('member_dues')
-    .select('id, junta_id, household_id, profile_id, amount, status, mercadopago_payment_id')
+    .select('id, junta_id, household_id, profile_id, period, amount, status, mercadopago_payment_id')
     .eq('id', dueId)
     .single();
   if (dueError || !due || due.junta_id !== juntaId || due.household_id !== householdId) {
@@ -76,6 +78,38 @@ export async function processMemberDuePayment(paymentId: string, mercadoPagoUser
     junta_id: juntaId,
     payload: payment,
   });
-  if (eventError && eventError.code !== '23505') throw new Error(eventError.message);
+  if (eventError?.code === '23505') return true;
+  if (eventError) throw new Error(eventError.message);
+
+  const emailStatus = payment.status === 'approved'
+    ? 'approved'
+    : payment.status === 'refunded'
+      ? 'refunded'
+      : ['rejected', 'cancelled'].includes(payment.status) && due.status !== 'paid'
+        ? 'rejected'
+        : null;
+  if (emailStatus) {
+    const [{ data: recipients }, { data: junta }] = await Promise.all([
+      admin.from('profiles').select('id, name, email').eq('household_id', householdId),
+      admin.from('juntas').select('name').eq('id', juntaId).single(),
+    ]);
+    const periodLabel = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(due.period));
+    await Promise.all((recipients ?? []).map((recipient) => {
+      const template = duePaymentTemplate({
+        name: recipient.name,
+        juntaName: junta?.name ?? 'tu junta vecinal',
+        period: periodLabel,
+        amount: Number(due.amount),
+        status: emailStatus,
+        paymentId: String(payment.id),
+        actionUrl: `${publicAppUrl()}/tesoreria`,
+      });
+      return sendEmailBestEffort({
+        to: recipient.email,
+        ...template,
+        idempotencyKey: `mercadopago-due-email:${payment.id}:${payment.status}:${recipient.id}`,
+      });
+    }));
+  }
   return true;
 }

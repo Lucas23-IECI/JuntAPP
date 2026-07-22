@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getMercadoPagoAuthorizedPayment, syncMercadoPagoSubscription } from '@/lib/mercadopago';
 import { processMemberDuePayment } from '@/lib/member-dues';
+import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
+import { subscriptionPaymentTemplate } from '@/lib/email-templates';
 
 function validSignature(request: Request, dataId: string) {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
@@ -23,7 +25,9 @@ async function recordEvent(eventId: string, juntaId: string, payload: unknown) {
     junta_id: juntaId,
     payload,
   });
-  if (error && error.code !== '23505') throw new Error(error.message);
+  if (error?.code === '23505') return false;
+  if (error) throw new Error(error.message);
+  return true;
 }
 
 export async function POST(request: Request) {
@@ -64,7 +68,30 @@ export async function POST(request: Request) {
       subscription_last_synced_at: new Date().toISOString(),
     }).eq('id', synced.juntaId);
     if (error) throw new Error(error.message);
-    await recordEvent(`mercadopago-authorized-payment:${dataId}`, synced.juntaId, invoice);
+    const isNewEvent = await recordEvent(`mercadopago-authorized-payment:${dataId}`, synced.juntaId, invoice);
+    if (isNewEvent && ['approved', 'rejected'].includes(paymentStatus)) {
+      const [{ data: owner }, { data: junta }] = await Promise.all([
+        admin.from('profiles').select('name, email').eq('id', synced.ownerId).single(),
+        admin.from('juntas').select('name, subscription_price').eq('id', synced.juntaId).single(),
+      ]);
+      if (owner?.email && junta) {
+        const renewalEmail = subscriptionPaymentTemplate({
+          name: owner.name,
+          juntaName: junta.name,
+          amount: Number(invoice.transaction_amount ?? junta.subscription_price),
+          status: paymentStatus as 'approved' | 'rejected',
+          nextPaymentDate: synced.subscription.next_payment_date
+            ? new Intl.DateTimeFormat('es-CL', { dateStyle: 'long' }).format(new Date(synced.subscription.next_payment_date))
+            : null,
+          actionUrl: `${publicAppUrl()}/socios`,
+        });
+        await sendEmailBestEffort({
+          to: owner.email,
+          ...renewalEmail,
+          idempotencyKey: `subscription-payment-email:${dataId}:${paymentStatus}`,
+        });
+      }
+    }
     return NextResponse.json({ received: true });
   } catch {
     // A non-2xx response asks Mercado Pago to retry a valid event that could not

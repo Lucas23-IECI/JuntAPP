@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { rateLimit } from '@/lib/rate-limit';
 import { createClient } from '@/lib/supabase/server';
+import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
+import { dueReminderTemplate } from '@/lib/email-templates';
 
 const notificationSchema = z.object({
   type: z.enum(['asamblea', 'votacion', 'cuota', 'seguridad']),
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, junta_id, role')
+    .select('id, junta_id, role, juntas(name, monthly_due_amount)')
     .eq('id', user.id)
     .single();
 
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
 
   const { data: recipients, error: recipientsError } = await supabase
     .from('profiles')
-    .select('id, household_id')
+    .select('id, household_id, name, email')
     .eq('junta_id', profile.junta_id);
 
   if (recipientsError) {
@@ -54,7 +56,8 @@ export async function POST(request: Request) {
   const period = `${new Date().toISOString().slice(0, 7)}-01`;
   const { data: paidDues } = parsed.data.onlyPending ? await supabase.from('member_dues').select('household_id').eq('junta_id', profile.junta_id).eq('period', period).eq('status', 'paid') : { data: [] };
   const paidHouseholdIds = new Set((paidDues ?? []).map((due) => due.household_id));
-  const rows = (recipients ?? []).filter((recipient) => !parsed.data.onlyPending || !paidHouseholdIds.has(recipient.household_id)).map((recipient) => ({
+  const pendingRecipients = (recipients ?? []).filter((recipient) => !parsed.data.onlyPending || !paidHouseholdIds.has(recipient.household_id));
+  const rows = pendingRecipients.map((recipient) => ({
     user_id: recipient.id,
     type: parsed.data.type,
     title: parsed.data.title,
@@ -67,6 +70,26 @@ export async function POST(request: Request) {
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
+  }
+
+  if (parsed.data.type === 'cuota' && parsed.data.onlyPending) {
+    const junta = Array.isArray(profile.juntas) ? profile.juntas[0] : profile.juntas;
+    const periodLabel = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(period));
+    const sentOn = new Date().toISOString().slice(0, 10);
+    await Promise.all(pendingRecipients.map((recipient) => {
+      const template = dueReminderTemplate({
+        name: recipient.name,
+        juntaName: junta?.name ?? 'tu junta vecinal',
+        period: periodLabel,
+        amount: Number(junta?.monthly_due_amount ?? 0),
+        actionUrl: `${publicAppUrl()}${parsed.data.action ?? '/tesoreria'}`,
+      });
+      return sendEmailBestEffort({
+        to: recipient.email,
+        ...template,
+        idempotencyKey: `due-reminder:${period}:${sentOn}:${recipient.id}`,
+      });
+    }));
   }
 
   return NextResponse.json({ delivered: rows.length });

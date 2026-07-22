@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimit } from '@/lib/rate-limit';
+import { publicAppUrl, sendEmailBestEffort, sendTransactionalEmail } from '@/lib/email';
+import { membershipInviteTemplate, membershipRejectedTemplate } from '@/lib/email-templates';
 
 const decisionSchema = z.object({
   decision: z.enum(['approve', 'reject']),
@@ -26,30 +28,61 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { data: application } = await admin.from('membership_applications').select('*, juntas(invite_code, name)').eq('id', applicationId).eq('junta_id', secretary.junta_id).maybeSingle();
   if (!application) return NextResponse.json({ error: 'Solicitud no encontrada.' }, { status: 404 });
   if (application.status !== 'pending') return NextResponse.json({ error: 'La solicitud ya fue resuelta.' }, { status: 409 });
+  const junta = Array.isArray(application.juntas) ? application.juntas[0] : application.juntas;
 
   const reviewedAt = new Date().toISOString();
   if (parsed.data.decision === 'reject') {
     const { error } = await admin.from('membership_applications').update({ status: 'rejected', reviewed_by: user.id, reviewed_at: reviewedAt, rejection_reason: parsed.data.reason, updated_at: reviewedAt }).eq('id', application.id).eq('status', 'pending');
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    const rejectionEmail = membershipRejectedTemplate({
+      name: application.name,
+      juntaName: junta?.name ?? 'tu junta vecinal',
+      reason: parsed.data.reason ?? 'La solicitud no cumple los requisitos informados por la junta.',
+    });
+    await sendEmailBestEffort({
+      to: application.email,
+      ...rejectionEmail,
+      idempotencyKey: `membership-rejected:${application.id}`,
+    });
     return NextResponse.json({ status: 'rejected' });
   }
 
-  const junta = Array.isArray(application.juntas) ? application.juntas[0] : application.juntas;
   if (!junta?.invite_code) return NextResponse.json({ error: 'La junta no tiene un código de ingreso válido.' }, { status: 409 });
   const { data: claimedApplication, error: approvalError } = await admin.from('membership_applications').update({ status: 'approved', reviewed_by: user.id, reviewed_at: reviewedAt, rejection_reason: null, updated_at: reviewedAt }).eq('id', application.id).eq('status', 'pending').select('id').maybeSingle();
   if (approvalError) return NextResponse.json({ error: approvalError.message }, { status: 400 });
   if (!claimedApplication) return NextResponse.json({ error: 'La solicitud ya está siendo procesada.' }, { status: 409 });
 
-  const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(application.email, {
-    data: {
-      name: application.name, rut: application.rut, address: application.address, phone: application.phone,
-      junta_action: 'join', invite_code: junta.invite_code, approved_application_id: application.id,
+  const { data: invited, error: inviteError } = await admin.auth.admin.generateLink({
+    type: 'invite',
+    email: application.email,
+    options: {
+      data: {
+        name: application.name, rut: application.rut, address: application.address, phone: application.phone,
+        junta_action: 'join', invite_code: junta.invite_code, approved_application_id: application.id,
+      },
+      redirectTo: `${publicAppUrl()}/aceptar-invitacion`,
     },
-    redirectTo: process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '')}/aceptar-invitacion` : undefined,
   });
   if (inviteError || !invited.user) {
     await admin.from('membership_applications').update({ status: 'pending', reviewed_by: null, reviewed_at: null, updated_at: new Date().toISOString() }).eq('id', application.id).eq('status', 'approved').eq('reviewed_by', user.id);
     return NextResponse.json({ error: inviteError?.message ?? 'No fue posible enviar la invitación de acceso.' }, { status: 400 });
+  }
+  try {
+    const inviteEmail = membershipInviteTemplate({
+      name: application.name,
+      juntaName: junta.name,
+      actionUrl: invited.properties.action_link,
+    });
+    const delivery = await sendTransactionalEmail({
+      to: application.email,
+      ...inviteEmail,
+      idempotencyKey: `membership-invite:${application.id}`,
+    });
+    if (!delivery.delivered) throw new Error('Resend no está configurado.');
+  } catch (error) {
+    await admin.auth.admin.deleteUser(invited.user.id);
+    await admin.from('membership_applications').update({ status: 'pending', reviewed_by: null, reviewed_at: null, updated_at: new Date().toISOString() }).eq('id', application.id).eq('status', 'approved').eq('reviewed_by', user.id);
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'No fue posible enviar la invitación de acceso.' }, { status: 503 });
   }
   await admin.from('notifications').insert({ user_id: invited.user.id, type: 'registro', title: 'Solicitud aprobada', message: 'Secretaría aprobó tu ingreso. Activa tu contraseña desde el correo de invitación.', read: false, date: new Date().toISOString(), action: '/inicio' });
   return NextResponse.json({ status: 'approved', userId: invited.user.id });

@@ -4,6 +4,8 @@ import { cleanRUT, validateRUT } from '@/lib/utils';
 import { rateLimit } from '@/lib/rate-limit';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { publicAppUrl, sendTransactionalEmail } from '@/lib/email';
+import { membershipInviteTemplate } from '@/lib/email-templates';
 
 const memberSchema = z.object({
   name: z.string().trim().min(3).max(160),
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, junta_id, juntas(invite_code)')
+    .select('role, junta_id, juntas(invite_code, name)')
     .eq('id', user.id)
     .single();
 
@@ -46,17 +48,21 @@ export async function POST(request: Request) {
 
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin.auth.admin.inviteUserByEmail(parsed.data.email, {
-      data: {
-        name: parsed.data.name,
-        rut: cleanRUT(parsed.data.rut),
-        address: parsed.data.address,
-        phone: parsed.data.phone,
-        junta_action: 'join',
-        invite_code: junta.invite_code,
-        manual_invite: true,
+    const { data, error } = await admin.auth.admin.generateLink({
+      type: 'invite',
+      email: parsed.data.email,
+      options: {
+        data: {
+          name: parsed.data.name,
+          rut: cleanRUT(parsed.data.rut),
+          address: parsed.data.address,
+          phone: parsed.data.phone,
+          junta_action: 'join',
+          invite_code: junta.invite_code,
+          manual_invite: true,
+        },
+        redirectTo: `${publicAppUrl()}/aceptar-invitacion`,
       },
-      redirectTo: process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/aceptar-invitacion` : undefined,
     });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
@@ -71,6 +77,22 @@ export async function POST(request: Request) {
         const message = roleError.code === '23505' ? 'Ese cargo ya está ocupado en la junta.' : roleError.message;
         return NextResponse.json({ error: message }, { status: 409 });
       }
+    }
+    try {
+      const inviteEmail = membershipInviteTemplate({
+        name: parsed.data.name,
+        juntaName: junta.name,
+        actionUrl: data.properties.action_link,
+      });
+      const delivery = await sendTransactionalEmail({
+        to: parsed.data.email,
+        ...inviteEmail,
+        idempotencyKey: `manual-member-invite:${data.user.id}`,
+      });
+      if (!delivery.delivered) throw new Error('Resend no está configurado.');
+    } catch (error) {
+      await admin.auth.admin.deleteUser(data.user.id);
+      throw error;
     }
     return NextResponse.json({ id: data.user.id }, { status: 201 });
   } catch (error) {
