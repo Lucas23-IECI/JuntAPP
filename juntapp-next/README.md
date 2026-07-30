@@ -39,6 +39,7 @@ npx supabase db push
 - `NEXT_PUBLIC_SUPABASE_URL`: URL pública del proyecto Supabase.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: clave pública/anon.
 - `SUPABASE_SERVICE_ROLE_KEY`: clave exclusiva del servidor, usada para invitar socios y procesar pagos.
+- `SUPERADMIN_EMAILS`: correos autorizados para el panel global, separados por coma. También se admite `app_metadata.role = "superadmin"` en Supabase Auth.
 - `NEXT_PUBLIC_APP_URL`: URL pública, sin `/` final.
 - `PAYMENT_WEBHOOK_SECRET`: secreto HMAC SHA-256 para `/api/webhooks/payment`.
 - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`: clave pública para el formulario seguro de tarjeta.
@@ -52,6 +53,10 @@ npx supabase db push
 - `REGISTRATION_EMAIL_FROM`: remitente verificado, por ejemplo `JuntAPP <solicitudes@tu-dominio.cl>`.
 
 Nunca expongas `SUPABASE_SERVICE_ROLE_KEY` con el prefijo `NEXT_PUBLIC_`.
+
+## Panel Superadmin
+
+El panel global está disponible en `/superadmin`. Reutiliza una cuenta de Supabase Auth, pero exige además que su correo esté en `SUPERADMIN_EMAILS` o que tenga el rol `superadmin` en `app_metadata`. Incluye resumen global, gestión de juntas y suscripciones, control de acceso de usuarios, seguimiento de operaciones y comunicaciones segmentadas.
 
 Las juntas nuevas permanecen pendientes hasta que Mercado Pago autoriza la suscripción. El servidor fija y verifica $15.000 CLP mensuales, IVA incluido. Los webhooks de `subscription_preapproval` y `subscription_authorized_payment` sincronizan renovaciones, rechazos y cancelaciones.
 

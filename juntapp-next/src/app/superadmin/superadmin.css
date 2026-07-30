@@ -1,0 +1,58 @@
+/*
+ * JuntAPP's legacy public theme ships an unlayered reset after Tailwind.
+ * These scoped rules restore the spacing and typography utilities used by
+ * Superadmin without changing the public site or the member dashboard.
+ */
+.superadmin-root .p-3 { padding: .75rem; }
+.superadmin-root .p-4 { padding: 1rem; }
+.superadmin-root .p-5 { padding: 1.25rem; }
+.superadmin-root .p-6 { padding: 1.5rem; }
+.superadmin-root .p-8 { padding: 2rem; }
+.superadmin-root .p-14 { padding: 3.5rem; }
+.superadmin-root .px-2 { padding-inline: .5rem; }
+.superadmin-root .px-3 { padding-inline: .75rem; }
+.superadmin-root .px-4 { padding-inline: 1rem; }
+.superadmin-root .px-5 { padding-inline: 1.25rem; }
+.superadmin-root .py-1 { padding-block: .25rem; }
+.superadmin-root .py-1\.5 { padding-block: .375rem; }
+.superadmin-root .py-2 { padding-block: .5rem; }
+.superadmin-root .py-2\.5 { padding-block: .625rem; }
+.superadmin-root .py-3 { padding-block: .75rem; }
+.superadmin-root .py-4 { padding-block: 1rem; }
+.superadmin-root .py-10 { padding-block: 2.5rem; }
+.superadmin-root .py-12 { padding-block: 3rem; }
+.superadmin-root .py-16 { padding-block: 4rem; }
+.superadmin-root .pb-2 { padding-bottom: .5rem; }
+.superadmin-root .pb-4 { padding-bottom: 1rem; }
+.superadmin-root .pl-9 { padding-left: 2.25rem; }
+.superadmin-root .pl-10 { padding-left: 2.5rem; }
+.superadmin-root .pr-3 { padding-right: .75rem; }
+.superadmin-root .mt-1 { margin-top: .25rem; }
+.superadmin-root .mt-2 { margin-top: .5rem; }
+.superadmin-root .mt-3 { margin-top: .75rem; }
+.superadmin-root .mt-4 { margin-top: 1rem; }
+.superadmin-root .mb-2 { margin-bottom: .5rem; }
+.superadmin-root .mb-3 { margin-bottom: .75rem; }
+.superadmin-root .mb-5 { margin-bottom: 1.25rem; }
+.superadmin-root .ml-2 { margin-left: .5rem; }
+.superadmin-root .mx-auto { margin-inline: auto; }
+.superadmin-root .space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: .5rem; }
+.superadmin-root .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: .75rem; }
+.superadmin-root .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+.superadmin-root .space-y-5 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem; }
+.superadmin-root .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
+.superadmin-root .space-y-7 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.75rem; }
+.superadmin-root .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 2rem; }
+.superadmin-root .font-medium { font-weight: 500; }
+.superadmin-root .font-semibold { font-weight: 600; }
+.superadmin-root .font-bold { font-weight: 700; }
+.superadmin-root .font-black { font-weight: 900; }
+
+@media (min-width: 640px) {
+  .superadmin-root .sm\:p-5 { padding: 1.25rem; }
+  .superadmin-root .sm\:p-6 { padding: 1.5rem; }
+}
+@media (min-width: 1024px) {
+  .superadmin-root .lg\:p-8 { padding: 2rem; }
+  .superadmin-root .lg\:px-8 { padding-inline: 2rem; }
+}
