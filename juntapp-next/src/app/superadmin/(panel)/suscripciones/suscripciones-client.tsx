@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { FiAlertTriangle, FiArrowUpRight, FiCheckCircle, FiDollarSign, FiPauseCircle, FiPlayCircle, FiSearch } from 'react-icons/fi';
+import { billingSummary } from '@/lib/junta-billing';
 import { updateJuntaSubscriptionAction } from '../actions';
 
 type Subscription = {
@@ -13,6 +14,8 @@ type Subscription = {
   subscription_plan: string;
   subscription_price: number;
   whatsapp_addon: boolean;
+  billing_mode: string;
+  trial_ends_at: string | null;
   subscription_next_payment_date: string | null;
   subscription_last_payment_status: string | null;
   subscription_last_synced_at: string | null;
@@ -40,9 +43,12 @@ export default function SuscripcionesClient({ subscriptions }: { subscriptions: 
   const [feedback, setFeedback] = useState('');
   const [pending, startTransition] = useTransition();
   const active = subscriptions.filter((item) => item.subscription_status === 'authorized');
+  const trialing = active.filter((item) => item.billing_mode === 'trial_then_subscription');
+  const billable = active.filter((item) => item.billing_mode === 'subscription');
   const attention = subscriptions.filter((item) => ['past_due', 'pending'].includes(item.subscription_status));
   const inactive = subscriptions.filter((item) => ['paused', 'cancelled'].includes(item.subscription_status));
-  const mrr = active.reduce((sum, item) => sum + Number(item.subscription_price || 0), 0);
+  const mrr = billable.reduce((sum, item) => sum + Number(item.subscription_price || 0), 0);
+  const futureMrr = trialing.reduce((sum, item) => sum + Number(item.subscription_price || 0), 0);
   const normalizedSearch = search.trim().toLowerCase();
   const filtered = subscriptions.filter((item) => {
     const matchesTab = tab === 'all' || (tab === 'attention' ? ['past_due', 'pending'].includes(item.subscription_status) : tab === 'inactive' ? ['paused', 'cancelled'].includes(item.subscription_status) : item.subscription_status === tab);
@@ -75,10 +81,11 @@ export default function SuscripcionesClient({ subscriptions }: { subscriptions: 
         <p className="mt-1 text-sm font-bold text-slate-500">Planes, cobros y estados de Mercado Pago.</p>
       </header>
 
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         {[
           { label: 'MRR estimado', value: money(mrr), icon: FiDollarSign, color: 'bg-[#bffcc6]' },
-          { label: 'Activas', value: active.length, icon: FiCheckCircle, color: 'bg-[#9ee7ff]' },
+          { label: 'Activas con cobro', value: billable.length, icon: FiCheckCircle, color: 'bg-[#9ee7ff]' },
+          { label: 'En período gratis', value: `${trialing.length} · ${money(futureMrr)}`, icon: FiDollarSign, color: 'bg-[#fff4c2]' },
           { label: 'Con alertas', value: attention.length, icon: FiAlertTriangle, color: 'bg-[#fff4a3]' },
           { label: 'Pausadas/canceladas', value: inactive.length, icon: FiPauseCircle, color: 'bg-[#ffb5e8]' },
         ].map((item) => {
@@ -92,7 +99,7 @@ export default function SuscripcionesClient({ subscriptions }: { subscriptions: 
           <h2 className="font-black uppercase">Distribución del MRR</h2>
           <div className="mt-4 space-y-3">
             {Object.entries(planLabels).map(([plan, label]) => {
-              const planItems = active.filter((item) => item.subscription_plan === plan);
+              const planItems = billable.filter((item) => item.subscription_plan === plan);
               const total = planItems.reduce((sum, item) => sum + Number(item.subscription_price), 0);
               return <div key={plan} className="flex items-center justify-between border-2 border-black bg-[#fffaf0] p-3"><span><strong className="block text-sm">{label}</strong><small className="font-bold text-slate-400">{planItems.length} activas</small></span><strong>{money(total)}</strong></div>;
             })}
@@ -129,8 +136,8 @@ export default function SuscripcionesClient({ subscriptions }: { subscriptions: 
                 <td className="px-4 py-4 font-black">{money(item.subscription_price)}</td>
                 <td className="px-4 py-4"><span className={`border-2 border-black px-2 py-1 text-[10px] font-black uppercase ${statusColor(item.subscription_status)}`}>{statusLabels[item.subscription_status]}</span></td>
                 <td className="px-4 py-4 text-xs font-bold">{item.subscription_next_payment_date ? new Intl.DateTimeFormat('es-CL').format(new Date(item.subscription_next_payment_date)) : 'Sin fecha'}</td>
-                <td className="px-4 py-4"><span className={`border-2 border-black px-2 py-1 text-[10px] font-black uppercase ${item.mercadopago_subscription_id ? 'bg-[#bffcc6]' : 'bg-slate-100'}`}>{item.mercadopago_subscription_id ? item.subscription_last_payment_status ?? 'Conectado' : 'Manual'}</span></td>
-                <td className="px-4 py-4"><div className="flex gap-2"><button disabled={pending || busy === item.id} onClick={() => toggle(item)} title={item.subscription_status === 'authorized' ? 'Pausar' : 'Activar'} className={`grid h-9 w-9 place-items-center border-2 border-black shadow-[2px_2px_0_#000] ${item.subscription_status === 'authorized' ? 'bg-[#ffb5e8]' : 'bg-[#bffcc6]'}`}>{busy === item.id ? '…' : item.subscription_status === 'authorized' ? <FiPauseCircle /> : <FiPlayCircle />}</button><Link href={`/superadmin/juntas/${item.id}`} title="Editar detalle" className="grid h-9 w-9 place-items-center border-2 border-black bg-[#071b34] text-white shadow-[2px_2px_0_#f97316]"><FiArrowUpRight /></Link></div></td>
+                <td className="px-4 py-4"><span className={`border-2 border-black px-2 py-1 text-[10px] font-black uppercase ${item.mercadopago_subscription_id ? 'bg-[#bffcc6]' : item.billing_mode === 'trial_then_subscription' ? 'bg-[#fff4a3]' : 'bg-slate-100'}`}>{item.mercadopago_subscription_id ? item.subscription_last_payment_status ?? 'Conectado' : billingSummary(item)}</span></td>
+                <td className="px-4 py-4"><div className="flex gap-2"><button disabled={pending || busy === item.id || item.billing_mode !== 'subscription'} onClick={() => toggle(item)} title={item.billing_mode !== 'subscription' ? 'Edita el beneficio desde el detalle' : item.subscription_status === 'authorized' ? 'Pausar' : 'Activar'} className={`grid h-9 w-9 place-items-center border-2 border-black shadow-[2px_2px_0_#000] disabled:opacity-35 ${item.subscription_status === 'authorized' ? 'bg-[#ffb5e8]' : 'bg-[#bffcc6]'}`}>{busy === item.id ? '…' : item.subscription_status === 'authorized' ? <FiPauseCircle /> : <FiPlayCircle />}</button><Link href={`/superadmin/juntas/${item.id}`} title="Editar detalle" className="grid h-9 w-9 place-items-center border-2 border-black bg-[#071b34] text-white shadow-[2px_2px_0_#f97316]"><FiArrowUpRight /></Link></div></td>
               </tr>
             ))}
           </tbody>

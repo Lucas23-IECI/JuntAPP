@@ -20,6 +20,12 @@ export interface Junta {
   subscription_price: number;
   subscription_plan: 'juntapp' | 'juntapp_web' | 'web';
   whatsapp_addon: boolean;
+  billing_mode: 'subscription' | 'trial_then_subscription' | 'complimentary';
+  trial_ends_at: string | null;
+  trial_warning_sent_at: string | null;
+  trial_expired_at: string | null;
+  trial_expired_notice_sent_at: string | null;
+  billing_notes: string | null;
   mercadopago_preference_id: string | null;
   mercadopago_payment_id: string | null;
   mercadopago_subscription_id: string | null;

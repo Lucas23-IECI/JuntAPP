@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { juntaHasActiveAccess } from '@/lib/junta-billing';
+import { expireJuntaTrialIfNeeded } from '@/lib/junta-trial';
 import { cleanRUT, validateRUT } from '@/lib/utils';
 import { rateLimit } from '@/lib/rate-limit';
 import { sendRegistrationLetter } from '@/lib/registration-letter';
@@ -24,14 +26,15 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient();
   const rut = cleanRUT(parsed.data.rut).toUpperCase();
-  const { data: junta } = await admin.from('juntas').select('id, name, subscription_status').eq('invite_code', parsed.data.inviteCode).maybeSingle();
+  const { data: junta } = await admin.from('juntas').select('id, name, subscription_status, billing_mode, trial_ends_at').eq('invite_code', parsed.data.inviteCode).maybeSingle();
   if (!junta) return NextResponse.json({ error: 'El código no corresponde a una junta registrada.' }, { status: 404 });
-  if (junta.subscription_status !== 'authorized') return NextResponse.json({ error: 'La junta no tiene una suscripción activa.' }, { status: 409 });
+  const currentJunta = await expireJuntaTrialIfNeeded(junta);
+  if (!juntaHasActiveAccess(currentJunta)) return NextResponse.json({ error: 'La junta no tiene una suscripción activa.' }, { status: 409 });
 
   const [{ data: existingProfile }, { data: existingApplication }, { data: board }] = await Promise.all([
     admin.from('profiles').select('id').or(`rut.eq.${rut},email.ilike.${parsed.data.email}`).maybeSingle(),
-    admin.from('membership_applications').select('id').eq('junta_id', junta.id).eq('status', 'pending').or(`rut.eq.${rut},email.ilike.${parsed.data.email}`).maybeSingle(),
-    admin.from('profiles').select('id, email, board_position').eq('junta_id', junta.id).eq('role', 'dirigente'),
+    admin.from('membership_applications').select('id').eq('junta_id', currentJunta.id).eq('status', 'pending').or(`rut.eq.${rut},email.ilike.${parsed.data.email}`).maybeSingle(),
+    admin.from('profiles').select('id, email, board_position').eq('junta_id', currentJunta.id).eq('role', 'dirigente'),
   ]);
   if (existingProfile) return NextResponse.json({ error: 'El RUT o correo ya pertenece a un socio registrado.' }, { status: 409 });
   if (existingApplication) return NextResponse.json({ error: 'Ya existe una solicitud pendiente para este RUT o correo.' }, { status: 409 });
@@ -39,7 +42,7 @@ export async function POST(request: Request) {
   if (!secretary) return NextResponse.json({ error: 'La junta aún no ha designado a Secretaría. Contacta a su directiva.' }, { status: 409 });
 
   const { data: application, error } = await admin.from('membership_applications').insert({
-    junta_id: junta.id, name: parsed.data.name, rut, address: parsed.data.address,
+    junta_id: currentJunta.id, name: parsed.data.name, rut, address: parsed.data.address,
     phone: parsed.data.phone, email: parsed.data.email,
   }).select('*').single();
   if (error || !application) return NextResponse.json({ error: error?.message ?? 'No fue posible crear la solicitud.' }, { status: 400 });
@@ -56,7 +59,7 @@ export async function POST(request: Request) {
   try {
     const delivery = await sendRegistrationLetter({
       secretaryEmail: secretary.email, boardEmails: (board ?? []).map((member) => member.email),
-      juntaName: junta.name, applicantName: application.name, applicantRut: application.rut,
+      juntaName: currentJunta.name, applicantName: application.name, applicantRut: application.rut,
       applicantAddress: application.address, applicantPhone: application.phone,
       applicantEmail: application.email, applicationId: application.id,
     });

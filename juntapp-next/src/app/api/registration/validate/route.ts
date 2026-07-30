@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { juntaHasActiveAccess } from '@/lib/junta-billing';
+import { expireJuntaTrialIfNeeded } from '@/lib/junta-trial';
 import { rateLimit } from '@/lib/rate-limit';
 import { cleanRUT } from '@/lib/utils';
 
@@ -34,14 +36,15 @@ export async function POST(request: Request) {
     if (!parsed.data.inviteCode) return NextResponse.json({ error: 'Ingresa el código de seis caracteres de tu junta.' }, { status: 400 });
     const { data: junta } = await admin
       .from('juntas')
-      .select('name, subscription_status')
+      .select('id, name, subscription_status, billing_mode, trial_ends_at')
       .eq('invite_code', parsed.data.inviteCode)
       .maybeSingle();
     if (!junta) return NextResponse.json({ error: 'El código no corresponde a ninguna junta registrada.' }, { status: 404 });
-    if (junta.subscription_status !== 'authorized') {
+    const currentJunta = await expireJuntaTrialIfNeeded(junta);
+    if (!juntaHasActiveAccess(currentJunta)) {
       return NextResponse.json({ error: 'La junta existe, pero su suscripción no está activa.' }, { status: 409 });
     }
-    return NextResponse.json({ valid: true, juntaName: junta.name });
+    return NextResponse.json({ valid: true, juntaName: currentJunta.name });
   }
 
   return NextResponse.json({ valid: true });

@@ -21,6 +21,7 @@ type JuntaRow = {
   subscription_status: string;
   subscription_plan: string;
   subscription_price: number;
+  billing_mode: string;
   created_at: string;
 };
 
@@ -56,7 +57,7 @@ export default async function SuperadminDashboard() {
     applicationsResult,
     proposalsResult,
   ] = await Promise.all([
-    admin.from('juntas').select('id, name, comuna, region, subscription_status, subscription_plan, subscription_price, created_at').order('created_at', { ascending: false }),
+    admin.from('juntas').select('id, name, comuna, region, subscription_status, subscription_plan, subscription_price, billing_mode, created_at').order('created_at', { ascending: false }),
     admin.from('profiles').select('id, junta_id, role, cuota_status, created_at'),
     admin.from('transactions').select('junta_id, type, amount, date').gte('date', monthStart.toISOString().slice(0, 10)),
     admin.from('member_dues').select('amount, status, paid_at').eq('status', 'paid').gte('paid_at', monthStart.toISOString()),
@@ -69,8 +70,10 @@ export default async function SuperadminDashboard() {
   const transactions = transactionsResult.data ?? [];
   const dues = duesResult.data ?? [];
   const activeJuntas = juntas.filter((junta) => junta.subscription_status === 'authorized');
+  const billableJuntas = activeJuntas.filter((junta) => junta.billing_mode === 'subscription');
+  const trialJuntas = activeJuntas.filter((junta) => junta.billing_mode === 'trial_then_subscription');
   const attentionJuntas = juntas.filter((junta) => ['pending', 'past_due'].includes(junta.subscription_status));
-  const mrr = activeJuntas.reduce((sum, junta) => sum + Number(junta.subscription_price || 0), 0);
+  const mrr = billableJuntas.reduce((sum, junta) => sum + Number(junta.subscription_price || 0), 0);
   const newJuntas = juntas.filter((junta) => new Date(junta.created_at) >= weekStart).length;
   const leaders = profiles.filter((profile) => profile.role === 'dirigente').length;
   const collectedDues = dues.reduce((sum, due) => sum + Number(due.amount || 0), 0);
@@ -83,8 +86,8 @@ export default async function SuperadminDashboard() {
     .slice(0, 5);
 
   const cards = [
-    { label: 'MRR estimado', value: money(mrr), detail: `${activeJuntas.length} suscripciones activas`, icon: FiDollarSign, color: 'bg-[#bffcc6]' },
-    { label: 'Juntas activas', value: activeJuntas.length, detail: `${juntas.length} registradas en total`, icon: FiHome, color: 'bg-[#9ee7ff]' },
+    { label: 'MRR estimado', value: money(mrr), detail: `${billableJuntas.length} suscripciones con cobro`, icon: FiDollarSign, color: 'bg-[#bffcc6]' },
+    { label: 'Juntas activas', value: activeJuntas.length, detail: `${trialJuntas.length} con meses gratis`, icon: FiHome, color: 'bg-[#9ee7ff]' },
     { label: 'Usuarios', value: profiles.length, detail: `${leaders} integrantes de directiva`, icon: FiUsers, color: 'bg-[#ffb5e8]' },
     { label: 'Requieren atención', value: attentionJuntas.length, detail: `${applicationsResult.count ?? 0} solicitudes pendientes`, icon: FiAlertTriangle, color: 'bg-[#fff4a3]' },
   ];

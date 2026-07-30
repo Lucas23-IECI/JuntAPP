@@ -15,7 +15,6 @@ import {
   FiUsers,
   FiX,
 } from 'react-icons/fi';
-import { createClient } from '@/lib/supabase/client';
 
 const navigation = [
   { href: '/superadmin', label: 'Resumen', icon: FiBarChart2 },
@@ -53,7 +52,7 @@ export default function SuperadminShell({
   }, [open]);
 
   async function logout() {
-    await createClient().auth.signOut();
+    await fetch('/api/auth/superadmin-logout', { method: 'POST' });
     router.replace('/superadmin/login');
     router.refresh();
   }

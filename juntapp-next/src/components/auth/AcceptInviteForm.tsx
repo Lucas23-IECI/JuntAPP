@@ -12,9 +12,13 @@ export default function AcceptInviteForm() {
     event.preventDefault(); setLoading(true); setError(''); const form = new FormData(event.currentTarget); const password = String(form.get('password')); const confirmation = String(form.get('confirmation'));
     if (password.length < 8) { setError('La contraseña debe tener al menos 8 caracteres.'); setLoading(false); return; }
     if (password !== confirmation) { setError('Las contraseñas no coinciden.'); setLoading(false); return; }
-    const { error: updateError } = await createClient().auth.updateUser({ password });
+    const supabase = createClient();
+    const { error: updateError } = await supabase.auth.updateUser({ password });
     if (updateError) { setError('El enlace expiró o no es válido. Solicita una nueva invitación.'); setLoading(false); return; }
-    router.push('/inicio'); router.refresh();
+    const { data: profile } = await supabase.from('profiles').select('role, juntas(subscription_plan)').single();
+    const junta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
+    router.push(profile?.role === 'dirigente' && junta?.subscription_plan === 'web' ? '/mi-pagina' : '/inicio');
+    router.refresh();
   }
   return <form onSubmit={handleSubmit} className="auth-form active"><div className="form-group"><label className="form-label">Nueva contraseña</label><input name="password" type="password" required minLength={8} autoComplete="new-password" className="form-input" /></div><div className="form-group"><label className="form-label">Repite la contraseña</label><input name="confirmation" type="password" required minLength={8} autoComplete="new-password" className="form-input" /></div>{error && <p className="auth-error-message">{error}</p>}<button type="submit" disabled={loading} className="btn btn-primary btn-block btn-lg">{loading ? 'Activando…' : 'Activar cuenta'}</button></form>;
 }

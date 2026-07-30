@@ -70,6 +70,40 @@ export function membershipInviteTemplate(input: { name: string; juntaName: strin
   return { subject: `Tu ingreso a ${input.juntaName} fue aprobado`, html: layout('Activa tu cuenta', content) };
 }
 
+export function juntaOwnerInviteTemplate(input: {
+  name: string;
+  juntaName: string;
+  planName: string;
+  monthlyPrice: number;
+  benefit: string;
+  billingStartsAt: string | null;
+  actionUrl: string;
+}): EmailTemplate {
+  const billingDate = input.billingStartsAt
+    ? new Intl.DateTimeFormat('es-CL', { dateStyle: 'long' }).format(new Date(input.billingStartsAt))
+    : null;
+  const content = paragraph(`Hola ${input.name}, el equipo de JuntAPP creó el espacio de ${input.juntaName} y te asignó como presidente titular.`)
+    + detailRows([
+      ['Plan', input.planName],
+      ['Mensualidad normal', formatClp(input.monthlyPrice)],
+      ['Beneficio inicial', input.benefit],
+      ...(billingDate ? [['Cobro requerido desde', billingDate] as [string, string]] : []),
+    ])
+    + paragraph(
+      billingDate
+        ? 'Durante el período gratuito no necesitas ingresar una tarjeta. Al finalizar, JuntAPP solicitará activar la suscripción mensual mediante Mercado Pago para conservar el acceso.'
+        : input.benefit.includes('Cortesía')
+          ? 'La cuenta quedó activa como cortesía. El equipo de JuntAPP te avisará si cambian sus condiciones comerciales.'
+          : 'Para habilitar el servicio debes activar la suscripción mensual mediante Mercado Pago.',
+    )
+    + button('Crear contraseña y entrar', input.actionUrl)
+    + paragraph('El enlace es personal y tiene una duración limitada.');
+  return {
+    subject: `Tu junta ya está creada — ${input.juntaName}`,
+    html: layout('Activa la cuenta de tu junta', content, `${input.juntaName} ya está disponible en JuntAPP`),
+  };
+}
+
 export function membershipRejectedTemplate(input: { name: string; juntaName: string; reason: string }): EmailTemplate {
   const content = paragraph(`Hola ${input.name}, Secretaría revisó tu solicitud de ingreso a ${input.juntaName}.`)
     + detailRows([['Resultado', 'Solicitud rechazada'], ['Motivo', input.reason]])
@@ -82,6 +116,25 @@ export function passwordRecoveryTemplate(input: { name?: string; actionUrl: stri
   const content = paragraph(greeting) + button('Crear nueva contraseña', input.actionUrl)
     + paragraph('Si no solicitaste este cambio, ignora este correo. Tu contraseña actual seguirá funcionando.');
   return { subject: 'Recupera tu acceso a JuntAPP', html: layout('Restablece tu contraseña', content) };
+}
+
+export function superadminLoginCodeTemplate(input: {
+  name: string;
+  code: string;
+  expiresInMinutes: number;
+}): EmailTemplate {
+  const content = paragraph(`Hola ${input.name}, usa este código para iniciar sesión en el panel Superadmin de JuntAPP.`)
+    + `<div style="margin:24px 0;padding:20px;background:#fffaf0;border:2px solid ${PRIMARY};text-align:center">
+        <span style="font-family:Consolas,Monaco,monospace;font-size:34px;line-height:1;letter-spacing:.22em;font-weight:900;color:${PRIMARY}">${escapeHtml(input.code)}</span>
+      </div>`
+    + paragraph(`El código vence en ${input.expiresInMinutes} minutos y solo puede utilizarse una vez.`)
+    + `<div style="margin-top:16px;padding:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:12px;line-height:1.5">
+        Si no solicitaste este acceso, ignora el mensaje. Nunca compartas este código.
+      </div>`;
+  return {
+    subject: 'Tu código de acceso al panel — JuntAPP',
+    html: layout('Acceso seguro', content, 'Tu código temporal para el panel Superadmin'),
+  };
 }
 
 export function dueReminderTemplate(input: { name: string; juntaName: string; period: string; amount: number; actionUrl: string }): EmailTemplate {
@@ -116,6 +169,40 @@ export function subscriptionPaymentTemplate(input: {
   const content = paragraph(`Hola ${input.name}, ${approved ? 'Mercado Pago confirmó la renovación mensual de JuntAPP.' : 'Mercado Pago no pudo completar el cobro mensual de JuntAPP. Revisa tu medio de pago para evitar la suspensión del servicio.'}`)
     + detailRows(rows) + button(approved ? 'Ir a JuntAPP' : 'Revisar suscripción', input.actionUrl);
   return { subject: `${title} — ${input.juntaName}`, html: layout(title, content) };
+}
+
+export function juntaTrialExpiringTemplate(input: {
+  name: string;
+  juntaName: string;
+  endsAt: string;
+  monthlyPrice: number;
+  actionUrl: string;
+}): EmailTemplate {
+  const endDate = new Intl.DateTimeFormat('es-CL', { dateStyle: 'long' }).format(new Date(input.endsAt));
+  const content = paragraph(`Hola ${input.name}, el período gratuito de ${input.juntaName} termina pronto.`)
+    + detailRows([['Último día del beneficio', endDate], ['Mensualidad posterior', formatClp(input.monthlyPrice)]])
+    + paragraph('Cuando termine el beneficio deberás autorizar la suscripción mensual con Mercado Pago para mantener activo el panel y el ingreso de vecinos.')
+    + button('Revisar mi cuenta', input.actionUrl);
+  return {
+    subject: `El período gratis de ${input.juntaName} termina pronto`,
+    html: layout('Tu beneficio está por finalizar', content),
+  };
+}
+
+export function juntaTrialExpiredTemplate(input: {
+  name: string;
+  juntaName: string;
+  monthlyPrice: number;
+  actionUrl: string;
+}): EmailTemplate {
+  const content = paragraph(`Hola ${input.name}, finalizó el período gratuito de ${input.juntaName}.`)
+    + detailRows([['Estado', 'Suscripción requerida'], ['Mensualidad', formatClp(input.monthlyPrice)]])
+    + paragraph('Tus datos permanecen guardados. Activa la suscripción mensual con Mercado Pago para recuperar el acceso y mantener habilitado el código de ingreso de la junta.')
+    + button('Activar suscripción', input.actionUrl);
+  return {
+    subject: `Activa la suscripción de ${input.juntaName}`,
+    html: layout('Finalizó el período gratuito', content),
+  };
 }
 
 export function formatClp(amount: number) {

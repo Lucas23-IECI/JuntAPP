@@ -34,7 +34,7 @@ function BellIcon() {
   return <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
 }
 
-export default function OriginalDashboardShell({ profile, junta, children }: { profile: Profile; junta: Junta | null; children: React.ReactNode }) {
+export default function OriginalDashboardShell({ profile, junta, trialEndsAt, children }: { profile: Profile; junta: Junta | null; trialEndsAt: string | null; children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const currentRoute = pathname.split('/')[1] || 'inicio';
@@ -119,6 +119,12 @@ export default function OriginalDashboardShell({ profile, junta, children }: { p
       <main className="app-main-content" id="mainContent">
         <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button><button className="mobile-menu-toggle" type="button" aria-label={mobileMenuOpen?'Cerrar menú':'Abrir menú'} aria-expanded={mobileMenuOpen} onClick={()=>setMobileMenuOpen((value)=>!value)}><span/><span/><span/></button></div></header>
         {mobileMenuOpen&&<div className="mobile-navigation-menu" role="navigation" aria-label="Menú principal">{visibleNavigation.map((item)=><Link href={item.href} className={`mobile-navigation-link ${currentRoute===item.route?'active':''}`} key={item.route} onClick={()=>setMobileMenuOpen(false)}><NavIcon icon={item.icon}/><span>{item.label}</span></Link>)}<div className="mobile-menu-secondary"><button type="button" onClick={toggleTheme}>{dark?'Modo claro':'Modo oscuro'}</button><button type="button" className="logout" onClick={logout}>Cerrar sesión</button></div></div>}
+        {trialEndsAt && (
+          <div className="mx-4 mt-4 border-4 border-black bg-[#fff4a3] px-4 py-3 text-[#071b34] shadow-[4px_4px_0_#000] sm:mx-6">
+            <p className="text-xs font-black uppercase">Período gratuito hasta {new Intl.DateTimeFormat('es-CL').format(new Date(trialEndsAt))}</p>
+            <p className="mt-1 text-xs font-bold">Al finalizar, Presidencia deberá activar la suscripción mensual con Mercado Pago para conservar el acceso.</p>
+          </div>
+        )}
         {children}
       </main>
     </div>

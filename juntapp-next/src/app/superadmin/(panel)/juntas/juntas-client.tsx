@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { FiArrowUpRight, FiDownload, FiFilter, FiHome, FiSearch, FiUsers } from 'react-icons/fi';
+import { FiArrowUpRight, FiDownload, FiFilter, FiHome, FiPlus, FiSearch, FiUsers } from 'react-icons/fi';
+import { billingSummary } from '@/lib/junta-billing';
 
 type Junta = {
   id: string;
@@ -15,6 +16,8 @@ type Junta = {
   subscription_plan: string;
   subscription_price: number;
   whatsapp_addon: boolean;
+  billing_mode: string;
+  trial_ends_at: string | null;
   created_at: string;
   members: number;
   leaders: number;
@@ -61,13 +64,14 @@ export default function JuntasClient({ juntas }: { juntas: Junta[] }) {
 
   function downloadCsv() {
     const rows = [
-      ['Junta', 'Comuna', 'Región', 'Código', 'Plan', 'Estado', 'Socios', 'Dirigentes', 'Precio'],
+      ['Junta', 'Comuna', 'Región', 'Código', 'Plan', 'Beneficio', 'Estado', 'Socios', 'Dirigentes', 'Precio'],
       ...filtered.map((junta) => [
         junta.name,
         junta.comuna ?? '',
         junta.region,
         junta.invite_code,
         planLabels[junta.subscription_plan] ?? junta.subscription_plan,
+        billingSummary(junta),
         statusLabels[junta.subscription_status] ?? junta.subscription_status,
         junta.members,
         junta.leaders,
@@ -85,10 +89,15 @@ export default function JuntasClient({ juntas }: { juntas: Junta[] }) {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs font-black uppercase tracking-[.18em] text-[#f97316]">Organizaciones</p>
-        <h1 className="text-3xl font-black uppercase tracking-tighter sm:text-4xl">Juntas de vecinos</h1>
-        <p className="mt-1 text-sm font-bold text-slate-500">{juntas.length} organizaciones registradas en JuntAPP.</p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[.18em] text-[#f97316]">Organizaciones</p>
+          <h1 className="text-3xl font-black uppercase tracking-tighter sm:text-4xl">Juntas de vecinos</h1>
+          <p className="mt-1 text-sm font-bold text-slate-500">{juntas.length} organizaciones registradas en JuntAPP.</p>
+        </div>
+        <Link href="/superadmin/juntas/nueva" className="flex shrink-0 items-center justify-center gap-2 border-4 border-black bg-[#f97316] px-4 py-3 text-xs font-black uppercase shadow-[4px_4px_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+          <FiPlus /> Agregar junta
+        </Link>
       </header>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -139,6 +148,7 @@ export default function JuntasClient({ juntas }: { juntas: Junta[] }) {
             </div>
             <div className="flex flex-wrap gap-2 text-xs font-black">
               <span className="border-2 border-black bg-[#fffaf0] px-2 py-1">{planLabels[junta.subscription_plan]}</span>
+              <span className="border-2 border-black bg-[#fff4a3] px-2 py-1">{billingSummary(junta)}</span>
               <span className="flex items-center gap-1 border-2 border-black bg-[#fffaf0] px-2 py-1"><FiUsers /> {junta.members} socios</span>
               <span className="border-2 border-black bg-[#fffaf0] px-2 py-1">Código {junta.invite_code}</span>
             </div>
@@ -150,13 +160,14 @@ export default function JuntasClient({ juntas }: { juntas: Junta[] }) {
       <section className="hidden overflow-x-auto border-4 border-black bg-white shadow-[6px_6px_0_#000] lg:block">
         <table className="w-full min-w-[980px] text-sm">
           <thead className="border-b-4 border-black bg-[#fff4c2] text-left text-xs font-black uppercase tracking-wider">
-            <tr><th className="px-5 py-4">Junta</th><th className="px-4 py-4">Plan</th><th className="px-4 py-4">Estado</th><th className="px-4 py-4">Socios</th><th className="px-4 py-4">Código</th><th className="px-4 py-4">Registro</th><th /></tr>
+            <tr><th className="px-5 py-4">Junta</th><th className="px-4 py-4">Plan</th><th className="px-4 py-4">Beneficio</th><th className="px-4 py-4">Estado</th><th className="px-4 py-4">Socios</th><th className="px-4 py-4">Código</th><th className="px-4 py-4">Registro</th><th /></tr>
           </thead>
           <tbody>
             {filtered.map((junta) => (
               <tr key={junta.id} className="border-b-2 border-black/10 hover:bg-[#fffaf0]">
                 <td className="px-5 py-4"><strong className="block">{junta.name}</strong><small className="font-bold text-slate-400">{junta.comuna ?? 'Sin comuna'} · {junta.region}</small></td>
                 <td className="px-4 py-4"><span className="border-2 border-black bg-[#9ee7ff] px-2 py-1 text-xs font-black">{planLabels[junta.subscription_plan] ?? junta.subscription_plan}</span>{junta.whatsapp_addon && <small className="ml-2 font-black text-emerald-700">+ WhatsApp</small>}</td>
+                <td className="px-4 py-4 text-xs font-black">{billingSummary(junta)}</td>
                 <td className="px-4 py-4"><span className={`border-2 border-black px-2 py-1 text-[10px] font-black uppercase ${statusColor(junta.subscription_status)}`}>{statusLabels[junta.subscription_status] ?? junta.subscription_status}</span></td>
                 <td className="px-4 py-4 font-black">{junta.members} <small className="font-bold text-slate-400">({junta.leaders} dirigentes)</small></td>
                 <td className="px-4 py-4 font-mono text-xs font-black">{junta.invite_code}</td>

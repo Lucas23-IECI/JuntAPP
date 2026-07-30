@@ -8,7 +8,7 @@ export default async function JuntasPage() {
   const [{ data: juntas, error }, { data: profiles }] = await Promise.all([
     admin
       .from('juntas')
-      .select('id, name, slug, comuna, region, invite_code, subscription_status, subscription_plan, subscription_price, whatsapp_addon, created_at')
+      .select('id, name, slug, comuna, region, invite_code, subscription_status, subscription_plan, subscription_price, whatsapp_addon, billing_mode, trial_ends_at, created_at')
       .order('created_at', { ascending: false }),
     admin.from('profiles').select('junta_id, role'),
   ]);

@@ -7,6 +7,8 @@ import {
   syncMercadoPagoSubscription,
   type MercadoPagoSubscription,
 } from '@/lib/mercadopago';
+import { juntaHasActiveAccess } from '@/lib/junta-billing';
+import { expireJuntaTrialIfNeeded } from '@/lib/junta-trial';
 import { rateLimit } from '@/lib/rate-limit';
 
 const subscriptionSchema = z.object({
@@ -35,12 +37,13 @@ export async function POST(request: Request) {
     .select('id, name, email, role, juntas(*)')
     .eq('id', user.id)
     .single();
-  const junta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
-  if (!profile || !junta) return NextResponse.json({ error: 'Registro pendiente no encontrado.' }, { status: 404 });
+  const rawJunta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
+  if (!profile || !rawJunta) return NextResponse.json({ error: 'Registro pendiente no encontrado.' }, { status: 404 });
+  const junta = await expireJuntaTrialIfNeeded(rawJunta);
   if (profile.role !== 'dirigente' || junta.owner_id !== user.id) {
     return NextResponse.json({ error: 'Solo quien creó la junta puede administrar su suscripción.' }, { status: 403 });
   }
-  if (junta.subscription_status === 'authorized') {
+  if (juntaHasActiveAccess(junta)) {
     return NextResponse.json({ subscriptionId: junta.mercadopago_subscription_id, status: 'authorized', active: true });
   }
   if (junta.mercadopago_subscription_id && junta.subscription_status !== 'cancelled') {

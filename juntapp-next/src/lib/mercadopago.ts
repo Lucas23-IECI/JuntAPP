@@ -109,6 +109,9 @@ export async function syncMercadoPagoSubscription(subscriptionId: string, expect
     : mercadoPagoStatus;
   const { error: updateError } = await admin.from('juntas').update({
     subscription_status: status,
+    billing_mode: 'subscription',
+    trial_ends_at: null,
+    trial_warning_sent_at: null,
     mercadopago_subscription_id: subscription.id,
     subscription_next_payment_date: subscription.next_payment_date ?? null,
     subscription_last_synced_at: new Date().toISOString(),

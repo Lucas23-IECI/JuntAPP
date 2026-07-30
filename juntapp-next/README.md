@@ -39,9 +39,11 @@ npx supabase db push
 - `NEXT_PUBLIC_SUPABASE_URL`: URL pública del proyecto Supabase.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: clave pública/anon.
 - `SUPABASE_SERVICE_ROLE_KEY`: clave exclusiva del servidor, usada para invitar socios y procesar pagos.
-- `SUPERADMIN_EMAILS`: correos autorizados para el panel global, separados por coma. También se admite `app_metadata.role = "superadmin"` en Supabase Auth.
 - `NEXT_PUBLIC_APP_URL`: URL pública, sin `/` final.
 - `PAYMENT_WEBHOOK_SECRET`: secreto HMAC SHA-256 para `/api/webhooks/payment`.
+- `SUPERADMIN_SESSION_SECRET`: secreto HMAC de 32 caracteres o más para firmar la sesión de superadmin. Si se omite, usa `PAYMENT_WEBHOOK_SECRET`.
+- `SUPERADMIN_CODE_SECRET`: secreto HMAC opcional e independiente para proteger los códigos de acceso.
+- `CRON_SECRET`: secreto enviado por Vercel Cron a `/api/cron/subscription-trials` para cerrar beneficios vencidos y enviar avisos.
 - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`: clave pública para el formulario seguro de tarjeta.
 - `MERCADOPAGO_ACCESS_TOKEN`: credencial privada para crear y verificar suscripciones mensuales de $15.000 CLP.
 - `MERCADOPAGO_TEST_PAYER_EMAIL`: comprador de prueba creado en Mercado Pago; solo se usa con credenciales `TEST-`.
@@ -56,7 +58,9 @@ Nunca expongas `SUPABASE_SERVICE_ROLE_KEY` con el prefijo `NEXT_PUBLIC_`.
 
 ## Panel Superadmin
 
-El panel global está disponible en `/superadmin`. Reutiliza una cuenta de Supabase Auth, pero exige además que su correo esté en `SUPERADMIN_EMAILS` o que tenga el rol `superadmin` en `app_metadata`. Incluye resumen global, gestión de juntas y suscripciones, control de acceso de usuarios, seguimiento de operaciones y comunicaciones segmentadas.
+El panel global está disponible en `/superadmin`. El acceso no usa contraseñas ni Supabase Auth: el servidor genera un código aleatorio de seis dígitos, conserva únicamente su hash firmado, lo envía por Resend y crea una cookie HTTP-only después de verificarlo. El código vence en 10 minutos, admite hasta cinco intentos y la sesión dura ocho horas. Los únicos correos autorizados son `diego.guzman@purocode.com` y `lucas.mendez@purocode.com`. Incluye resumen global, gestión de juntas y suscripciones, control de acceso de usuarios, seguimiento de operaciones y comunicaciones segmentadas.
+
+Desde **Juntas → Agregar junta**, el superadmin puede crear la organización, invitar a Presidencia y elegir cobro inmediato, 1/3/6/12 meses gratis o cortesía sin vencimiento. Los beneficios temporales no piden tarjeta; tres días antes se envía un aviso y, al vencer, la junta pasa a pago vencido hasta que su titular autorice la suscripción normal de Mercado Pago. El cron diario queda versionado en `vercel.json`.
 
 Las juntas nuevas permanecen pendientes hasta que Mercado Pago autoriza la suscripción. El servidor fija y verifica $15.000 CLP mensuales, IVA incluido. Los webhooks de `subscription_preapproval` y `subscription_authorized_payment` sincronizan renovaciones, rechazos y cancelaciones.
 
@@ -72,7 +76,7 @@ Si Resend no está configurado o rechaza un envío, la solicitud no se pierde: q
 
 Resend envía desde el servidor las solicitudes de ingreso, invitaciones aprobadas, rechazos, recuperación de contraseña, recordatorios de cuota, comprobantes y estados de pago, además de renovaciones aceptadas o rechazadas. Los envíos originados por webhooks usan claves de idempotencia para evitar duplicados.
 
-La confirmación inicial de correo al crear una junta pertenece a Supabase Auth. Su plantilla versionada está en `../backend/supabase/templates/confirmation.html`; debe mantenerse sincronizada con la plantilla **Confirm signup** del proyecto alojado en Supabase. Las plantillas locales de invitación y recuperación sirven como respaldo, aunque la aplicación genera esos enlaces seguros con Supabase y entrega los correos por Resend.
+La confirmación inicial de correo al crear una junta pertenece a Supabase Auth. Sus plantillas versionadas están en `../backend/supabase/templates/`; deben mantenerse sincronizadas con las plantillas del proyecto alojado en Supabase. Las plantillas locales de invitación y recuperación sirven como respaldo, aunque la aplicación genera esos enlaces seguros con Supabase y entrega los correos por Resend.
 
 ## Cobro de cuotas con la cuenta de cada junta
 
