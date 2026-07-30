@@ -52,7 +52,7 @@ npx supabase db push
 - `MERCADOPAGO_OAUTH_TEST_MODE`: usa `true` en sandbox y `false` en producción.
 - `MERCADOPAGO_WEBHOOK_SECRET`: firma secreta configurada en Webhooks de Mercado Pago para producción.
 - `RESEND_API_KEY`: credencial privada de Resend para enviar la carta de solicitud a Secretaría.
-- `REGISTRATION_EMAIL_FROM`: remitente verificado, por ejemplo `JuntAPP <solicitudes@tu-dominio.cl>`.
+- `REGISTRATION_EMAIL_FROM`: remitente verificado opcional. Si no se define, se usa `JuntAPP <solicitudes@juntapp.cl>`.
 
 Nunca expongas `SUPABASE_SERVICE_ROLE_KEY` con el prefijo `NEXT_PUBLIC_`.
 

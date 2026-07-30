@@ -45,7 +45,29 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const challengeToken = await requestSuperadminLoginCode(parsed.data.email);
+  const delivery = await requestSuperadminLoginCode(parsed.data.email);
+  const challengeToken = delivery.status === 'sent' ? delivery.challengeToken : null;
+
+  if (delivery.status === 'not_configured' || delivery.status === 'provider_error') {
+    const response = NextResponse.json(
+      {
+        error: delivery.status === 'not_configured'
+          ? 'El servicio de correo no está configurado. Revisa RESEND_API_KEY en producción.'
+          : 'Resend rechazó el envío del código. Revisa el remitente o los logs de producción.',
+      },
+      {
+        status: 503,
+        headers: { 'Cache-Control': 'no-store' },
+      },
+    );
+    response.cookies.set(
+      SUPERADMIN_CHALLENGE_COOKIE,
+      '',
+      superadminCookieOptions(0),
+    );
+    return response;
+  }
+
   const response = NextResponse.json(
     { message: genericMessage },
     { headers: { 'Cache-Control': 'no-store' } },

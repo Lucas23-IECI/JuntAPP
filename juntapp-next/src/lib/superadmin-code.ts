@@ -11,7 +11,7 @@ import {
 
 export async function requestSuperadminLoginCode(email: string) {
   const account = getSuperadminAccount(email);
-  if (!account) return null;
+  if (!account) return { status: 'not_authorized' as const };
 
   const code = createSixDigitSuperadminCode();
   const challengeToken = createSuperadminChallenge(account.email, code);
@@ -27,9 +27,15 @@ export async function requestSuperadminLoginCode(email: string) {
       ...template,
       idempotencyKey: `superadmin-login:${account.email}:${Date.now()}`,
     });
-    return result.delivered ? challengeToken : null;
+    if (!result.delivered) {
+      console.error('[Superadmin] El servicio de correo no está configurado.');
+      return { status: 'not_configured' as const };
+    }
+
+    console.info('[Superadmin] Código de acceso enviado.', { emailProviderIds: result.ids });
+    return { status: 'sent' as const, challengeToken };
   } catch (error) {
     console.error('[Superadmin] No fue posible enviar el código de acceso.', error);
-    return null;
+    return { status: 'provider_error' as const };
   }
 }

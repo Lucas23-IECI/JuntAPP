@@ -8,8 +8,10 @@ type EmailMessage = {
   idempotencyKey?: string;
 };
 
+const DEFAULT_EMAIL_FROM = 'JuntAPP <solicitudes@juntapp.cl>';
+
 export function emailConfigured() {
-  return Boolean(process.env.RESEND_API_KEY && process.env.REGISTRATION_EMAIL_FROM);
+  return Boolean(process.env.RESEND_API_KEY);
 }
 
 export function publicAppUrl() {
@@ -22,8 +24,8 @@ function recipientKey(email: string) {
 
 export async function sendTransactionalEmail(message: EmailMessage) {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.REGISTRATION_EMAIL_FROM;
-  if (!apiKey || !from) return { delivered: false as const, reason: 'not_configured' as const, ids: [] as string[] };
+  const from = process.env.REGISTRATION_EMAIL_FROM?.trim() || DEFAULT_EMAIL_FROM;
+  if (!apiKey) return { delivered: false as const, reason: 'not_configured' as const, ids: [] as string[] };
 
   const recipients = [...new Set((Array.isArray(message.to) ? message.to : [message.to])
     .map((email) => email.trim().toLowerCase())
