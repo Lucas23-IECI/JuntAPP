@@ -2465,41 +2465,6 @@ body.logged-out .demo-toolbar {
   margin-top: 4px;
 }
 
-.auth-mode-selector {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.auth-mode-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--primary-subtle);
-  border: 1.5px solid var(--border);
-  border-radius: 50px;
-  padding: 6px 14px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-
-.badge-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.badge-dot.orange {
-  background-color: var(--accent-orange);
-  box-shadow: 0 0 8px var(--accent-orange);
-}
-
-.badge-dot.green {
-  background-color: var(--success);
-  box-shadow: 0 0 8px var(--success);
-}
-
 .auth-tabs {
   display: flex;
   background: var(--primary-subtle);
