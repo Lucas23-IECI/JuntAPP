@@ -9,13 +9,23 @@ type EmailMessage = {
 };
 
 const DEFAULT_EMAIL_FROM = 'JuntAPP <solicitudes@juntapp.cl>';
+const PRODUCTION_APP_URL = 'https://juntapp.cl';
 
 export function emailConfigured() {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
 export function publicAppUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '');
+  const pointsToLocalhost = configuredUrl
+    ? /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(configuredUrl)
+    : false;
+
+  if (configuredUrl && (process.env.NODE_ENV !== 'production' || !pointsToLocalhost)) {
+    return configuredUrl;
+  }
+
+  return process.env.NODE_ENV === 'production' ? PRODUCTION_APP_URL : 'http://localhost:3000';
 }
 
 function recipientKey(email: string) {
