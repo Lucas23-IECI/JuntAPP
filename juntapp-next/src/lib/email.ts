@@ -21,7 +21,11 @@ export function publicAppUrl() {
     ? /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(configuredUrl)
     : false;
 
-  if (configuredUrl && (process.env.NODE_ENV !== 'production' || !pointsToLocalhost)) {
+  // Vercel must never emit auth links for a developer machine, even if a stale
+  // NEXT_PUBLIC_APP_URL was copied into the project's production environment.
+  if (process.env.VERCEL === '1') return PRODUCTION_APP_URL;
+
+  if (configuredUrl && !pointsToLocalhost) {
     return configuredUrl;
   }
 
