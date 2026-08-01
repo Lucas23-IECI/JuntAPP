@@ -15,7 +15,6 @@ function assert(condition, message) {
 
 const env = readEnv(path.resolve('.env.local'));
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const secretKey = env.SUPABASE_SERVICE_ROLE_KEY;
 const stamp = Date.now();
 const email = `codex-ui-smoke-${stamp}@example.com`;
@@ -24,7 +23,7 @@ let userId;
 let juntaId;
 let browser;
 
-const adminHeaders = { apikey: secretKey, 'User-Agent': 'JuntAPP-Server/1.0' };
+const adminHeaders = { apikey: secretKey, Authorization: `Bearer ${secretKey}`, 'User-Agent': 'JuntAPP-Server/1.0' };
 
 async function expectRoute(page, route, title) {
   const desktopNavigation = page.locator(`#nav-${route}`);
@@ -39,13 +38,13 @@ async function expectRoute(page, route, title) {
 }
 
 try {
-  const signup = await fetch(`${supabaseUrl}/auth/v1/signup`, {
-    method: 'POST', headers: { apikey: anonKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, data: { name: 'Cuenta Prueba Navegación', rut: `95${stamp}`, address: 'Dirección temporal', phone: '+56 9 1234 5678', junta_action: 'create', junta_name: `Junta UI Temporal ${stamp}`, junta_region: 'Valparaíso', junta_comuna: 'Valparaíso' } }),
+  const signup = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+    method: 'POST', headers: { ...adminHeaders, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { name: 'Cuenta Prueba Navegación', rut: `95${stamp}`, address: 'Dirección temporal', phone: '+56 9 1234 5678', junta_action: 'create', junta_name: `Junta UI Temporal ${stamp}`, junta_region: 'Valparaíso', junta_comuna: 'Valparaíso' } }),
   });
   const signupData = await signup.json();
   assert(signup.ok, `No se pudo crear usuario temporal: ${JSON.stringify(signupData)}`);
-  userId = signupData.user.id;
+  userId = signupData.id ?? signupData.user?.id;
   const profileResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=junta_id`, { headers: adminHeaders });
   const profiles = await profileResponse.json();
   juntaId = profiles[0]?.junta_id;
@@ -105,8 +104,8 @@ try {
   await page.locator('.report-modal.active').waitFor({ state: 'visible' });
   await page.locator('.report-modal.active .modal-close').click();
 
-  await expectRoute(page, 'votaciones', 'Votaciones Digitales');
-  await page.getByRole('button', { name: /Crear Nueva Votación/ }).click();
+  await expectRoute(page, 'consultas', 'Consultas Comunitarias');
+  await page.getByRole('button', { name: /Crear Nueva Consulta/ }).click();
   await page.locator('.modal.active').waitFor({ state: 'visible' });
   await page.locator('.modal.active input[name="title"]').fill('Consulta smoke test');
   await page.locator('.modal.active textarea[name="description"]').fill('Descripción de la consulta temporal para verificar Supabase.');
@@ -116,8 +115,8 @@ try {
   await page.locator('.modal.active').waitFor({ state: 'hidden' });
   await page.getByText('Consulta smoke test').waitFor({ state: 'visible' });
   await page.locator('.poll-option-card').first().click();
-  await page.getByRole('button', { name: /Confirmar y Emitir Mi Voto/ }).click();
-  await page.getByText(/Voto registrado con éxito/).waitFor({ state: 'visible' });
+  await page.getByRole('button', { name: /Confirmar mi respuesta/ }).click();
+  await page.getByText(/Respuesta registrada con éxito/).waitFor({ state: 'visible' });
 
   await expectRoute(page, 'comunicaciones', 'Anuncios Oficiales');
   await page.getByRole('button', { name: /Publicar Anuncio Oficial/ }).click();
@@ -128,8 +127,6 @@ try {
   await page.locator('.modal.active').waitFor({ state: 'hidden' });
   await page.getByText('Anuncio smoke test').waitFor({ state: 'visible' });
 
-  await page.locator('#themeToggle').click();
-  assert(await page.locator('html').getAttribute('data-theme') === 'dark', 'El selector de tema no funciona');
   await page.locator('#bellToggle').click();
   await page.locator('.notifications-panel.active').waitFor({ state: 'visible' });
   await page.getByText('Anuncio smoke test').last().waitFor({ state: 'visible' });
@@ -143,8 +140,21 @@ try {
   assert(dashboardBounds && viewport && dashboardBounds.y + dashboardBounds.height >= viewport.height - 1, 'El fondo del dashboard no cubre toda la ventana');
   assert(await page.locator('.original-dashboard-root').evaluate((element) => getComputedStyle(element).zoom) === '1', 'El dashboard tiene zoom interno y deja un espacio blanco');
   await page.setViewportSize({ width: 390, height: 844 });
-  await expectRoute(page, 'inicio', 'Panel de Inicio');
-  assert(await page.locator('.mobile-header').isVisible(), 'El header móvil no aparece');
+  const mobileRoutes = [
+    ['inicio', 'Panel de Inicio'],
+    ['socios', 'Registro de Socios'],
+    ['tesoreria', 'Tesorería Transparente'],
+    ['consultas', 'Consultas Comunitarias'],
+    ['comunicaciones', 'Anuncios Oficiales'],
+  ];
+  for (const [route, title] of mobileRoutes) {
+    await page.goto(`http://localhost:3000/${route}`);
+    await page.locator('.view-title').waitFor({ state: 'visible' });
+    assert((await page.locator('.view-title').textContent())?.includes(title), `Título móvil incorrecto en /${route}`);
+    assert(await page.locator('.mobile-header').isVisible(), `El header móvil no aparece en /${route}`);
+    const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, page: document.documentElement.scrollWidth }));
+    assert(dimensions.page <= dimensions.viewport, `Desborde horizontal en /${route}: ${dimensions.page}px > ${dimensions.viewport}px`);
+  }
   await page.locator('.mobile-menu-toggle').click();
   assert(await page.locator('.mobile-navigation-menu').isVisible(), 'La navegación móvil no aparece');
 
@@ -152,7 +162,7 @@ try {
   assert(pageErrors.length === 0, `Errores del navegador: ${pageErrors.join(' | ')}`);
   assert(!consoleErrors.some((message) => /hydration|server rendered|didn't match/i.test(message)), `Errores de hidrataciÃ³n: ${consoleErrors.join(' | ')}`);
   assert(failedRequests.length === 0, `Peticiones fallidas: ${failedRequests.join(' | ')}`);
-  console.log('SMOKE_OK routes=5 navigation=ok hydration=ok transaction=create poll=create+vote announcement=create notifications=realtime modals=ok tour=ok theme=ok mobile=ok');
+  console.log('SMOKE_OK routes=5 navigation=ok hydration=ok transaction=create consultation=create+answer announcement=create notifications=realtime modals=ok tour=ok mobile-overflow=ok');
 } finally {
   if (browser) await browser.close();
   if (userId) await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, { method: 'DELETE', headers: adminHeaders });

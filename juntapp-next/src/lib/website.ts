@@ -1,4 +1,15 @@
-export type WebsiteTemplate = 'comunidad' | 'mural' | 'institucional' | 'noticias' | 'minimalista';
+export type WebsiteTemplate =
+  | 'comunidad'
+  | 'mural'
+  | 'institucional'
+  | 'noticias'
+  | 'minimalista'
+  | 'editorial'
+  | 'fotografica'
+  | 'barrio'
+  | 'agenda'
+  | 'clasica'
+  | 'portal';
 export type WebsiteNewsItem = { id: string; title: string; summary: string; date: string; category: string; image: string };
 export type WebsiteContent = { title: string; subtitle: string; aboutTitle: string; about: string; servicesTitle: string; services: string[]; newsTitle: string; news: string; newsItems: WebsiteNewsItem[]; contactTitle: string; contact: string; address: string; whatsapp: string; facebook: string; instagram: string };
 export type WebsiteTheme = { primary: string; accent: string; background: string; text: string };
