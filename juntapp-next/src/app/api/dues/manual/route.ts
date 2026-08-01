@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rate-limit';
 import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
 import { duePaymentTemplate } from '@/lib/email-templates';
+import { sendPushToUsers } from '@/lib/web-push';
 
 const manualDueSchema = z.object({
   householdId: z.uuid(),
@@ -66,6 +67,12 @@ export async function POST(request: Request) {
         idempotencyKey: `manual-due-paid:${transactionId ?? `${target.id}:${period}`}:${recipient.id}`,
       });
     }));
+    await sendPushToUsers((recipients ?? []).map((recipient) => recipient.id), {
+      title: 'Cuota del domicilio registrada',
+      message: `La directiva confirmó la cuota de ${new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(period))}.`,
+      action: '/tesoreria',
+      tag: `cuota-manual:${target.id}:${period}`,
+    });
   }
   return NextResponse.json({ success: true, transactionId, status: parsed.data.action === 'paid' ? 'al_dia' : 'pendiente' });
 }

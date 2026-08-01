@@ -4,6 +4,7 @@ import { rateLimit } from '@/lib/rate-limit';
 import { createClient } from '@/lib/supabase/server';
 import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
 import { dueReminderTemplate } from '@/lib/email-templates';
+import { sendPushToUsers } from '@/lib/web-push';
 
 const notificationSchema = z.object({
   type: z.enum(['asamblea', 'votacion', 'cuota', 'seguridad']),
@@ -72,6 +73,13 @@ export async function POST(request: Request) {
     }
   }
 
+  const push = await sendPushToUsers(rows.map((row) => row.user_id), {
+    title: parsed.data.title,
+    message: parsed.data.message,
+    action: parsed.data.action ?? '/inicio',
+    tag: `${parsed.data.type}:${profile.junta_id}`,
+  });
+
   if (parsed.data.type === 'cuota' && parsed.data.onlyPending) {
     const junta = Array.isArray(profile.juntas) ? profile.juntas[0] : profile.juntas;
     const periodLabel = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(period));
@@ -92,5 +100,5 @@ export async function POST(request: Request) {
     }));
   }
 
-  return NextResponse.json({ delivered: rows.length });
+  return NextResponse.json({ delivered: rows.length, pushDelivered: push.delivered, pushSubscriptions: push.subscriptions });
 }

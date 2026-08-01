@@ -5,6 +5,7 @@ import { getMercadoPagoAuthorizedPayment, syncMercadoPagoSubscription } from '@/
 import { processMemberDuePayment } from '@/lib/member-dues';
 import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
 import { subscriptionPaymentTemplate } from '@/lib/email-templates';
+import { sendPushToUsers } from '@/lib/web-push';
 
 function validSignature(request: Request, dataId: string) {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
@@ -89,6 +90,16 @@ export async function POST(request: Request) {
           to: owner.email,
           ...renewalEmail,
           idempotencyKey: `subscription-payment-email:${dataId}:${paymentStatus}`,
+        });
+      }
+      if (junta) {
+        await sendPushToUsers([synced.ownerId], {
+          title: paymentStatus === 'approved' ? 'Suscripción JuntAPP pagada' : 'Problema con tu suscripción JuntAPP',
+          message: paymentStatus === 'approved'
+            ? 'Mercado Pago confirmó el cobro mensual de JuntAPP.'
+            : 'Mercado Pago rechazó el cobro mensual. Revisa el medio de pago para mantener el acceso.',
+          action: '/socios',
+          tag: `suscripcion:${dataId}`,
         });
       }
     }

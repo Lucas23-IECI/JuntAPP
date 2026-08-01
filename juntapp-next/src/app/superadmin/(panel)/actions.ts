@@ -12,6 +12,7 @@ import { isSuperadminEmail } from '@/lib/superadmin-config';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireSuperadmin, SUPERADMIN_PATH } from '@/lib/superadmin';
 import { cleanRUT, validateRUT } from '@/lib/utils';
+import { sendPushToUsers } from '@/lib/web-push';
 
 const subscriptionSchema = z.object({
   juntaId: z.string().uuid(),
@@ -378,12 +379,20 @@ export async function sendPlatformBroadcastAction(
     if (error) return { ok: false, message: `El envío quedó incompleto: ${error.message}` };
   }
 
+  const push = await sendPushToUsers(recipients.map((profile) => profile.id), {
+    title: parsed.data.title,
+    message: parsed.data.message,
+    action: parsed.data.action || '/inicio',
+    tag: `comunicado:${Date.now()}`,
+  });
+
   console.info('[Superadmin broadcast]', {
     adminId: adminUser.id,
     recipients: rows.length,
     juntaId: parsed.data.juntaId,
     role: parsed.data.role,
     plan: parsed.data.plan,
+    pushDelivered: push.delivered,
   });
 
   revalidatePath(`${SUPERADMIN_PATH}/comunicaciones`);

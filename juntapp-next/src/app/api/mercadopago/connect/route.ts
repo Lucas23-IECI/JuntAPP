@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { buildMercadoPagoAuthorizationUrl } from '@/lib/mercadopago-connect';
+import { buildMercadoPagoAuthorizationUrl, mercadoPagoOAuthPkceEnabled } from '@/lib/mercadopago-connect';
 
 function base64Url(buffer: Buffer) {
   return buffer.toString('base64url');
@@ -26,8 +26,9 @@ export async function GET(request: Request) {
 
   try {
     const state = base64Url(randomBytes(32));
-    const verifier = base64Url(randomBytes(64));
-    const challenge = createHash('sha256').update(verifier).digest('base64url');
+    const usePkce = mercadoPagoOAuthPkceEnabled();
+    const verifier = usePkce ? base64Url(randomBytes(64)) : undefined;
+    const challenge = verifier ? createHash('sha256').update(verifier).digest('base64url') : undefined;
     const authorizationUrl = buildMercadoPagoAuthorizationUrl({
       state,
       codeChallenge: challenge,
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
     const secure = authorizationUrl.protocol === 'https:' && process.env.NODE_ENV === 'production';
     const options = { httpOnly: true, secure, sameSite: 'lax' as const, maxAge: 600, path: '/' };
     response.cookies.set('mp_oauth_state', state, options);
-    response.cookies.set('mp_oauth_verifier', verifier, options);
+    if (verifier) response.cookies.set('mp_oauth_verifier', verifier, options);
     response.cookies.set('mp_oauth_junta', profile.junta_id, options);
     return response;
   } catch (error) {

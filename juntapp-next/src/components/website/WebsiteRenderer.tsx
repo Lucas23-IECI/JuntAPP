@@ -2,6 +2,7 @@ import type { WebsiteContent, WebsiteTemplate, WebsiteTheme } from '@/lib/websit
 import Link from 'next/link';
 import { FaFacebookF, FaInstagram, FaWhatsapp } from 'react-icons/fa6';
 import GalleryCarousel from './GalleryCarousel';
+import MobileSiteMenu from './MobileSiteMenu';
 
 /* User-managed images come from a dynamic public media library. */
 /* eslint-disable @next/next/no-img-element */
@@ -65,10 +66,7 @@ export default function WebsiteRenderer({ name, template, content, theme, logo, 
       <nav className="site-desktop-nav" aria-label="Navegación principal">
         {visibleNavigation.map(([href, label]) => <a href={href} key={href}>{label}</a>)}
       </nav>
-      <details className="site-mobile-menu">
-        <summary><span aria-hidden="true">☰</span> Menú</summary>
-        <nav aria-label="Navegación móvil">{visibleNavigation.map(([href, label]) => <a href={href} key={href}>{label}</a>)}</nav>
-      </details>
+      <MobileSiteMenu items={visibleNavigation} />
     </header>
 
     <section className="site-hero" style={heroStyle}>

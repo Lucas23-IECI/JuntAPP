@@ -41,18 +41,25 @@ export function mercadoPagoConnectConfigured() {
 export function mercadoPagoOAuthRedirectUri(origin?: string) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? origin?.replace(/\/$/, '');
   if (!appUrl) throw new Error('Falta configurar NEXT_PUBLIC_APP_URL.');
-  return `${appUrl}/api/mercadopago/connect/callback`;
+  // This exact URL is registered in the Mercado Pago application console.
+  return `${appUrl}/api/mercadopago/callback`;
 }
 
-export function buildMercadoPagoAuthorizationUrl({ state, codeChallenge, origin }: { state: string; codeChallenge: string; origin?: string }) {
+export function mercadoPagoOAuthPkceEnabled() {
+  return process.env.MERCADOPAGO_OAUTH_PKCE_ENABLED !== 'false';
+}
+
+export function buildMercadoPagoAuthorizationUrl({ state, codeChallenge, origin }: { state: string; codeChallenge?: string; origin?: string }) {
   const { clientId } = oauthConfig();
   const url = new URL('https://auth.mercadopago.com/authorization');
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('client_id', clientId);
   url.searchParams.set('redirect_uri', mercadoPagoOAuthRedirectUri(origin));
   url.searchParams.set('state', state);
-  url.searchParams.set('code_challenge', codeChallenge);
-  url.searchParams.set('code_challenge_method', 'S256');
+  if (codeChallenge) {
+    url.searchParams.set('code_challenge', codeChallenge);
+    url.searchParams.set('code_challenge_method', 'S256');
+  }
   return url;
 }
 
@@ -88,16 +95,16 @@ async function storeAccount(juntaId: string, token: OAuthTokenResponse) {
   if (error) throw new Error(error.message);
 }
 
-export async function exchangeMercadoPagoAuthorization({ juntaId, code, codeVerifier, origin }: { juntaId: string; code: string; codeVerifier: string; origin?: string }) {
+export async function exchangeMercadoPagoAuthorization({ juntaId, code, codeVerifier, origin }: { juntaId: string; code: string; codeVerifier?: string; origin?: string }) {
   const { clientId, clientSecret } = oauthConfig();
   const token = await requestOAuthToken({
     client_id: clientId,
     client_secret: clientSecret,
     grant_type: 'authorization_code',
     code,
-    code_verifier: codeVerifier,
     redirect_uri: mercadoPagoOAuthRedirectUri(origin),
-    test_token: process.env.MERCADOPAGO_OAUTH_TEST_MODE === 'true',
+    ...(codeVerifier ? { code_verifier: codeVerifier } : {}),
+    ...(process.env.MERCADOPAGO_OAUTH_TEST_MODE === 'true' ? { test_token: true } : {}),
   });
   await storeAccount(juntaId, token);
   return token;

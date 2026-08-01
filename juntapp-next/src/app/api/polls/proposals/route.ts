@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rate-limit';
+import { sendPushToUsers } from '@/lib/web-push';
 
 const schema = z.object({
   title: z.string().trim().min(5).max(160),
@@ -24,6 +25,9 @@ export async function POST(request: Request) {
   const { data: proposal, error } = await admin.from('poll_proposals').insert({ junta_id: profile.junta_id, proposed_by: user.id, title: parsed.data.title, description: parsed.data.description, options }).select('*').single();
   if (error || !proposal) return NextResponse.json({ error: error?.message ?? 'No fue posible guardar la propuesta.' }, { status: 400 });
   const { data: board } = await admin.from('profiles').select('id').eq('junta_id', profile.junta_id).eq('role', 'dirigente');
-  if (board?.length) await admin.from('notifications').insert(board.map((member) => ({ user_id: member.id, type: 'propuesta', title: 'Nueva propuesta de consulta', message: `${profile.name} propuso: ${proposal.title}`, read: false, date: new Date().toISOString(), action: '/consultas' })));
+  if (board?.length) {
+    await admin.from('notifications').insert(board.map((member) => ({ user_id: member.id, type: 'propuesta', title: 'Nueva propuesta de consulta', message: `${profile.name} propuso: ${proposal.title}`, read: false, date: new Date().toISOString(), action: '/consultas' })));
+    await sendPushToUsers(board.map((member) => member.id), { title: 'Nueva propuesta de consulta', message: `${profile.name} propuso: ${proposal.title}`, action: '/consultas', tag: `propuesta:${proposal.id}` });
+  }
   return NextResponse.json({ proposal }, { status: 201 });
 }

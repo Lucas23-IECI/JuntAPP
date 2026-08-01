@@ -5,14 +5,17 @@ import { processMemberDuePayment } from '@/lib/member-dues';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const result = url.searchParams.get('result') ?? 'pending';
+  const requestedResult = url.searchParams.get('result');
+  const result = ['approved', 'pending', 'failure'].includes(requestedResult ?? '') ? requestedResult! : 'pending';
   const paymentId = url.searchParams.get('payment_id') ?? url.searchParams.get('collection_id');
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? url.origin;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(`${appUrl}/login`);
 
-  let finalResult = result;
+  // The redirect is only a user experience hint. The result shown to the user
+  // is always reconciled against Mercado Pago's Payments API first.
+  let finalResult = result === 'approved' ? 'pending' : result;
   if (paymentId && /^\d+$/.test(paymentId)) {
     try {
       const { data: profile } = await supabase.from('profiles').select('junta_id').eq('id', user.id).single();
@@ -22,8 +25,10 @@ export async function GET(request: Request) {
         .eq('junta_id', profile.junta_id)
         .maybeSingle() : { data: null };
       if (connection) {
-        const processed = await processMemberDuePayment(paymentId, connection.mercadopago_user_id);
-        if (processed) finalResult = result === 'approved' ? 'approved' : result;
+        const paymentStatus = await processMemberDuePayment(paymentId, connection.mercadopago_user_id);
+        if (paymentStatus === 'approved') finalResult = 'approved';
+        else if (['rejected', 'cancelled'].includes(paymentStatus ?? '')) finalResult = 'failure';
+        else finalResult = 'pending';
       }
     } catch {
       finalResult = 'pending';

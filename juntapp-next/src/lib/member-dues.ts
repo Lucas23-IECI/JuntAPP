@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getJuntaMercadoPagoAccount } from '@/lib/mercadopago-connect';
 import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
 import { duePaymentTemplate } from '@/lib/email-templates';
+import { sendPushToUsers } from '@/lib/web-push';
 
 type MercadoPagoPayment = {
   id: number;
@@ -15,17 +16,17 @@ type MercadoPagoPayment = {
 };
 
 export async function processMemberDuePayment(paymentId: string, mercadoPagoUserId?: string | number) {
-  if (!/^\d+$/.test(paymentId) || !mercadoPagoUserId) return false;
+  if (!/^\d+$/.test(paymentId) || !mercadoPagoUserId) return null;
   const admin = createAdminClient();
   const { data: connection } = await admin
     .from('mercadopago_junta_accounts')
     .select('junta_id, mercadopago_user_id')
     .eq('mercadopago_user_id', Number(mercadoPagoUserId))
     .maybeSingle();
-  if (!connection) return false;
+  if (!connection) return null;
 
   const account = await getJuntaMercadoPagoAccount(connection.junta_id);
-  if (!account) return false;
+  if (!account) return null;
   const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${account.access_token}` },
     cache: 'no-store',
@@ -34,7 +35,7 @@ export async function processMemberDuePayment(paymentId: string, mercadoPagoUser
   if (!response.ok) throw new Error(payment.message ?? 'No fue posible verificar el pago de cuota.');
 
   const reference = payment.external_reference?.match(/^juntapp-due:([0-9a-f-]{36}):([0-9a-f-]{36}):([0-9a-f-]{36})$/i);
-  if (!reference) return false;
+  if (!reference) return null;
   const [, dueId, juntaId, householdId] = reference;
   if (juntaId !== connection.junta_id || Number(payment.collector_id) !== Number(connection.mercadopago_user_id)) {
     throw new Error('El pago pertenece a otra junta o cuenta recaudadora.');
@@ -78,7 +79,7 @@ export async function processMemberDuePayment(paymentId: string, mercadoPagoUser
     junta_id: juntaId,
     payload: payment,
   });
-  if (eventError?.code === '23505') return true;
+  if (eventError?.code === '23505') return payment.status;
   if (eventError) throw new Error(eventError.message);
 
   const emailStatus = payment.status === 'approved'
@@ -94,6 +95,17 @@ export async function processMemberDuePayment(paymentId: string, mercadoPagoUser
       admin.from('juntas').select('name').eq('id', juntaId).single(),
     ]);
     const periodLabel = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(due.period));
+    if (emailStatus === 'rejected' && recipients?.length) {
+      await admin.from('notifications').insert(recipients.map((recipient) => ({
+        user_id: recipient.id,
+        type: 'cuota',
+        title: 'Pago de cuota rechazado',
+        message: `Mercado Pago rechazó el pago de la cuota de ${periodLabel}.`,
+        read: false,
+        date: new Date().toISOString(),
+        action: '/tesoreria',
+      })));
+    }
     await Promise.all((recipients ?? []).map((recipient) => {
       const template = duePaymentTemplate({
         name: recipient.name,
@@ -110,6 +122,16 @@ export async function processMemberDuePayment(paymentId: string, mercadoPagoUser
         idempotencyKey: `mercadopago-due-email:${payment.id}:${payment.status}:${recipient.id}`,
       });
     }));
+    const pushCopy = emailStatus === 'approved'
+      ? { title: 'Cuota del domicilio recibida', message: `Mercado Pago confirmó la cuota de ${periodLabel} por $${Number(due.amount).toLocaleString('es-CL')}.` }
+      : emailStatus === 'refunded'
+        ? { title: 'Cuota reembolsada', message: `Mercado Pago informó el reembolso de la cuota de ${periodLabel}.` }
+        : { title: 'Pago de cuota rechazado', message: `Mercado Pago rechazó el pago de la cuota de ${periodLabel}. Puedes intentarlo nuevamente.` };
+    await sendPushToUsers((recipients ?? []).map((recipient) => recipient.id), {
+      ...pushCopy,
+      action: '/tesoreria',
+      tag: `cuota:${due.id}:${payment.status}`,
+    });
   }
-  return true;
+  return payment.status;
 }

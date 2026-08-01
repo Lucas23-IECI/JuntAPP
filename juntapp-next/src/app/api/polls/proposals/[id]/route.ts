@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rate-limit';
+import { sendPushToUsers } from '@/lib/web-push';
 
 const schema = z.object({ decision: z.enum(['approve', 'reject']), reason: z.string().trim().max(500).optional() })
   .refine((value) => value.decision === 'approve' || Boolean(value.reason), { message: 'Indica el motivo del rechazo.' });
@@ -27,6 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { error } = await admin.from('poll_proposals').update({ status: 'rejected', reviewed_by: user.id, reviewed_at: now, rejection_reason: parsed.data.reason, updated_at: now }).eq('id', proposal.id).eq('status', 'pending');
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     await admin.from('notifications').insert({ user_id: proposal.proposed_by, type: 'propuesta', title: 'Propuesta revisada', message: `La directiva rechazó “${proposal.title}”: ${parsed.data.reason}`, read: false, date: now, action: '/consultas' });
+    await sendPushToUsers([proposal.proposed_by], { title: 'Propuesta revisada', message: `La directiva rechazó “${proposal.title}”.`, action: '/consultas', tag: `propuesta:${proposal.id}:rejected` });
     return NextResponse.json({ status: 'rejected' });
   }
   const { data: activePoll } = await admin.from('polls').select('id').eq('junta_id', reviewer.junta_id).eq('active', true).maybeSingle();
@@ -36,6 +38,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { error: updateError } = await admin.from('poll_proposals').update({ status: 'approved', reviewed_by: user.id, reviewed_at: now, poll_id: poll.id, rejection_reason: null, updated_at: now }).eq('id', proposal.id).eq('status', 'pending');
   if (updateError) { await admin.from('polls').delete().eq('id', poll.id); return NextResponse.json({ error: updateError.message }, { status: 400 }); }
   const { data: members } = await admin.from('profiles').select('id').eq('junta_id', reviewer.junta_id);
-  if (members?.length) await admin.from('notifications').insert(members.map((member) => ({ user_id: member.id, type: 'votacion', title: 'Nueva consulta publicada', message: proposal.title, read: false, date: now, action: '/consultas' })));
+  if (members?.length) {
+    await admin.from('notifications').insert(members.map((member) => ({ user_id: member.id, type: 'votacion', title: 'Nueva consulta publicada', message: proposal.title, read: false, date: now, action: '/consultas' })));
+    await sendPushToUsers(members.map((member) => member.id), { title: 'Nueva consulta publicada', message: proposal.title, action: '/consultas', tag: `consulta:${poll.id}` });
+  }
   return NextResponse.json({ status: 'approved', pollId: poll.id });
 }

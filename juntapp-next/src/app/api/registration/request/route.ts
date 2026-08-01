@@ -6,6 +6,7 @@ import { expireJuntaTrialIfNeeded } from '@/lib/junta-trial';
 import { cleanRUT, validateRUT } from '@/lib/utils';
 import { rateLimit } from '@/lib/rate-limit';
 import { sendRegistrationLetter } from '@/lib/registration-letter';
+import { sendPushToUsers } from '@/lib/web-push';
 
 const schema = z.object({
   name: z.string().trim().min(3).max(160),
@@ -54,6 +55,12 @@ export async function POST(request: Request) {
     message: `${application.name} solicita ingresar desde ${application.address}. ${member.board_position === 'secretario' ? 'Revisa y resuelve la solicitud.' : 'Secretaría debe resolverla.'}`,
     read: false, date: new Date().toISOString(), action: '/socios',
   })));
+  await sendPushToUsers((board ?? []).map((member) => member.id), {
+    title: 'Nueva solicitud de socio',
+    message: `${application.name} solicita ingresar desde ${application.address}.`,
+    action: '/socios',
+    tag: `registro:${application.id}`,
+  });
 
   let deliveryStatus: 'sent' | 'in_app' | 'failed' = 'in_app';
   try {
