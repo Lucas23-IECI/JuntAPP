@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimit } from '@/lib/rate-limit';
-import { publicAppUrl, sendEmailBestEffort, sendTransactionalEmail } from '@/lib/email';
+import { authActionUrl, publicAppUrl, sendEmailBestEffort, sendTransactionalEmail } from '@/lib/email';
 import { membershipInviteTemplate, membershipRejectedTemplate } from '@/lib/email-templates';
 
 const decisionSchema = z.object({
@@ -71,7 +71,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const inviteEmail = membershipInviteTemplate({
       name: application.name,
       juntaName: junta.name,
-      actionUrl: invited.properties.action_link,
+      actionUrl: authActionUrl(invited.properties),
     });
     const delivery = await sendTransactionalEmail({
       to: application.email,

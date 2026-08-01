@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
+import { authActionUrl, publicAppUrl, sendEmailBestEffort } from '@/lib/email';
 import { passwordRecoveryTemplate } from '@/lib/email-templates';
 import { rateLimit } from '@/lib/rate-limit';
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   if (!error && data.properties?.action_link) {
     const template = passwordRecoveryTemplate({
       name: typeof data.user.user_metadata?.name === 'string' ? data.user.user_metadata.name : undefined,
-      actionUrl: data.properties.action_link,
+      actionUrl: authActionUrl(data.properties),
     });
     await sendEmailBestEffort({
       to: parsed.data.email,

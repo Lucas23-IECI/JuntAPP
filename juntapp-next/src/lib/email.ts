@@ -8,6 +8,11 @@ type EmailMessage = {
   idempotencyKey?: string;
 };
 
+type AuthLinkProperties = {
+  hashed_token?: string;
+  verification_type?: string;
+};
+
 const DEFAULT_EMAIL_FROM = 'JuntAPP <solicitudes@juntapp.cl>';
 const PRODUCTION_APP_URL = 'https://juntapp.cl';
 
@@ -30,6 +35,18 @@ export function publicAppUrl() {
   }
 
   return process.env.NODE_ENV === 'production' ? PRODUCTION_APP_URL : 'http://localhost:3000';
+}
+
+export function authActionUrl(properties: AuthLinkProperties) {
+  if (!properties.hashed_token || !properties.verification_type) {
+    throw new Error('Supabase no devolvió un token de acceso válido.');
+  }
+
+  const query = new URLSearchParams({
+    token_hash: properties.hashed_token,
+    type: properties.verification_type,
+  });
+  return `${publicAppUrl()}/confirmar-acceso?${query.toString()}`;
 }
 
 function recipientKey(email: string) {

@@ -4,7 +4,7 @@ import { cleanRUT, validateRUT } from '@/lib/utils';
 import { rateLimit } from '@/lib/rate-limit';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
-import { publicAppUrl, sendTransactionalEmail } from '@/lib/email';
+import { authActionUrl, publicAppUrl, sendTransactionalEmail } from '@/lib/email';
 import { membershipInviteTemplate } from '@/lib/email-templates';
 
 const memberSchema = z.object({
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       const inviteEmail = membershipInviteTemplate({
         name: parsed.data.name,
         juntaName: junta.name,
-        actionUrl: data.properties.action_link,
+        actionUrl: authActionUrl(data.properties),
       });
       const delivery = await sendTransactionalEmail({
         to: parsed.data.email,

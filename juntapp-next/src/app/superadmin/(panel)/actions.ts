@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { addCalendarMonths } from '@/lib/junta-billing';
 import { isValidChileLocation } from '@/lib/chile-locations';
-import { publicAppUrl, sendTransactionalEmail } from '@/lib/email';
+import { authActionUrl, publicAppUrl, sendTransactionalEmail } from '@/lib/email';
 import { juntaOwnerInviteTemplate } from '@/lib/email-templates';
 import { subscriptionPrice } from '@/lib/plans';
 import { isSuperadminEmail } from '@/lib/superadmin-config';
@@ -215,7 +215,7 @@ export async function createJuntaAction(
       monthlyPrice: price,
       benefit: terms.benefitLabel,
       billingStartsAt: terms.trialEndsAt,
-      actionUrl: invited.properties.action_link,
+      actionUrl: authActionUrl(invited.properties),
     });
     const delivery = await sendTransactionalEmail({
       to: parsed.data.ownerEmail,
