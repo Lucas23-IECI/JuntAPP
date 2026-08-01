@@ -7,7 +7,7 @@ const navItems = [
   { href: '/inicio', icon: '🏠', label: 'Inicio' },
   { href: '/socios', icon: '👥', label: 'Socios' },
   { href: '/tesoreria', icon: '💰', label: 'Caja' },
-  { href: '/votaciones', icon: '🗳️', label: 'Votar' },
+  { href: '/consultas', icon: '🗳️', label: 'Consultar' },
   { href: '/comunicaciones', icon: '📢', label: 'Avisos' },
 ];
 

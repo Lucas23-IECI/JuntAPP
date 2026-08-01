@@ -30,7 +30,7 @@ export default async function OperacionesPage() {
   const events = eventsResult.data ?? [];
   const activity = [
     ...applications.map((row) => ({ id: `application-${row.id}`, juntaId: row.junta_id, type: 'Solicitud de ingreso', title: row.name, detail: row.email, status: row.status, createdAt: row.created_at, icon: 'user' })),
-    ...proposals.map((row) => ({ id: `proposal-${row.id}`, juntaId: row.junta_id, type: 'Propuesta de votación', title: row.title, detail: 'Iniciativa vecinal', status: row.status, createdAt: row.created_at, icon: 'file' })),
+    ...proposals.map((row) => ({ id: `proposal-${row.id}`, juntaId: row.junta_id, type: 'Propuesta de consulta', title: row.title, detail: 'Iniciativa vecinal', status: row.status, createdAt: row.created_at, icon: 'file' })),
     ...dues.map((row) => ({ id: `due-${row.id}`, juntaId: row.junta_id, type: 'Cuota vecinal', title: new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(Number(row.amount)), detail: row.payment_source === 'manual' ? 'Registro manual' : 'Mercado Pago', status: row.status, createdAt: row.paid_at ?? row.created_at, icon: 'payment' })),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 60);
 

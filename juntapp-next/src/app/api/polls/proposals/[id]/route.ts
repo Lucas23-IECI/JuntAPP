@@ -26,16 +26,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (parsed.data.decision === 'reject') {
     const { error } = await admin.from('poll_proposals').update({ status: 'rejected', reviewed_by: user.id, reviewed_at: now, rejection_reason: parsed.data.reason, updated_at: now }).eq('id', proposal.id).eq('status', 'pending');
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-    await admin.from('notifications').insert({ user_id: proposal.proposed_by, type: 'propuesta', title: 'Propuesta revisada', message: `La directiva rechazó “${proposal.title}”: ${parsed.data.reason}`, read: false, date: now, action: '/votaciones' });
+    await admin.from('notifications').insert({ user_id: proposal.proposed_by, type: 'propuesta', title: 'Propuesta revisada', message: `La directiva rechazó “${proposal.title}”: ${parsed.data.reason}`, read: false, date: now, action: '/consultas' });
     return NextResponse.json({ status: 'rejected' });
   }
   const { data: activePoll } = await admin.from('polls').select('id').eq('junta_id', reviewer.junta_id).eq('active', true).maybeSingle();
-  if (activePoll) return NextResponse.json({ error: 'Ya existe una votación activa. Ciérrala antes de aprobar y publicar esta propuesta.' }, { status: 409 });
+  if (activePoll) return NextResponse.json({ error: 'Ya existe una consulta activa. Ciérrala antes de aprobar y publicar esta propuesta.' }, { status: 409 });
   const { data: poll, error: pollError } = await admin.from('polls').insert({ junta_id: reviewer.junta_id, title: proposal.title, description: proposal.description, options: proposal.options, active: true }).select('id').single();
-  if (pollError || !poll) return NextResponse.json({ error: pollError?.message ?? 'No fue posible publicar la votación.' }, { status: 400 });
+  if (pollError || !poll) return NextResponse.json({ error: pollError?.message ?? 'No fue posible publicar la consulta.' }, { status: 400 });
   const { error: updateError } = await admin.from('poll_proposals').update({ status: 'approved', reviewed_by: user.id, reviewed_at: now, poll_id: poll.id, rejection_reason: null, updated_at: now }).eq('id', proposal.id).eq('status', 'pending');
   if (updateError) { await admin.from('polls').delete().eq('id', poll.id); return NextResponse.json({ error: updateError.message }, { status: 400 }); }
   const { data: members } = await admin.from('profiles').select('id').eq('junta_id', reviewer.junta_id);
-  if (members?.length) await admin.from('notifications').insert(members.map((member) => ({ user_id: member.id, type: 'votacion', title: 'Nueva votación aprobada', message: proposal.title, read: false, date: now, action: '/votaciones' })));
+  if (members?.length) await admin.from('notifications').insert(members.map((member) => ({ user_id: member.id, type: 'votacion', title: 'Nueva consulta publicada', message: proposal.title, read: false, date: now, action: '/consultas' })));
   return NextResponse.json({ status: 'approved', pollId: poll.id });
 }

@@ -7,7 +7,7 @@ import 'driver.js/dist/driver.css';
 export const metadata: Metadata = {
   title: 'JuntAPP — Gestión Vecinal Digital',
   description: 'Plataforma digital para la gestión y transparencia de Juntas de Vecinos en Chile.',
-  keywords: ['junta de vecinos', 'chile', 'gestión vecinal', 'transparencia', 'votaciones'],
+  keywords: ['junta de vecinos', 'chile', 'gestión vecinal', 'transparencia', 'consultas comunitarias'],
   applicationName: 'JuntAPP',
   manifest: '/manifest.webmanifest',
   appleWebApp: {

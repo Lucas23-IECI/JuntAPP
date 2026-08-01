@@ -249,24 +249,6 @@
   color: var(--primary-light);
 }
 
-.mobile-theme-btn {
-  background: var(--primary-subtle);
-  border: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.mobile-theme-btn .icon-moon { display: block; }
-.mobile-theme-btn .icon-sun { display: none; }
-[data-theme="dark"] .mobile-theme-btn .icon-moon { display: none; }
-[data-theme="dark"] .mobile-theme-btn .icon-sun { display: block; }
-
 /* --- Views Switching --- */
 .app-view {
   display: none;
@@ -2366,15 +2348,15 @@
   transform: translateY(1px);
 }
 
-.theme-btn, .mobile-theme-btn, .mobile-bell-btn {
+.mobile-bell-btn {
   transition: transform var(--transition-fast);
 }
 
-.theme-btn:hover, .mobile-theme-btn:hover, .mobile-bell-btn:hover {
+.mobile-bell-btn:hover {
   transform: scale(1.05);
 }
 
-.theme-btn:active, .mobile-theme-btn:active, .mobile-bell-btn:active {
+.mobile-bell-btn:active {
   transform: scale(0.95);
 }
 

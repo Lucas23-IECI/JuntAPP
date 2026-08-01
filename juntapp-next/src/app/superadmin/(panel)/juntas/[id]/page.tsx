@@ -68,7 +68,7 @@ export default async function JuntaDetailPage({ params }: PageProps<'/superadmin
           { label: 'Socios', value: profiles.length, detail: `${profiles.filter((profile) => profile.role === 'dirigente').length} dirigentes`, icon: FiUsers, color: 'bg-[#ffb5e8]' },
           { label: 'Saldo histórico', value: money(income - expenses), detail: `${money(income)} ingresos`, icon: FiDollarSign, color: 'bg-[#bffcc6]' },
           { label: 'Cuotas cobradas', value: money(collectedDues), detail: `${dues.filter((due) => due.status === 'paid').length} pagos`, icon: FiCheckCircle, color: 'bg-[#fff4a3]' },
-          { label: 'Contenido', value: (pollsResult.data?.length ?? 0) + (announcementsResult.data?.length ?? 0), detail: `${pollsResult.data?.filter((poll) => poll.active).length ?? 0} votaciones activas`, icon: FiFileText, color: 'bg-[#9ee7ff]' },
+          { label: 'Contenido', value: (pollsResult.data?.length ?? 0) + (announcementsResult.data?.length ?? 0), detail: `${pollsResult.data?.filter((poll) => poll.active).length ?? 0} consultas activas`, icon: FiFileText, color: 'bg-[#9ee7ff]' },
         ].map((item) => {
           const ItemIcon = item.icon;
           return <article key={item.label} className={`border-4 border-black ${item.color} p-4 shadow-[4px_4px_0_#000]`}><ItemIcon className="mb-2 opacity-50" /><p className="text-[10px] font-black uppercase tracking-wider opacity-60">{item.label}</p><p className="text-2xl font-black tracking-tighter sm:text-3xl">{item.value}</p><p className="text-xs font-bold opacity-50">{item.detail}</p></article>;

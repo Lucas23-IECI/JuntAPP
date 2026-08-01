@@ -76,17 +76,6 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
       if (current) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
-    const applyTheme = (dark: boolean) => {
-      if (dark) document.documentElement.setAttribute('data-theme', 'dark');
-      else document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('juntapp_theme', dark ? 'dark' : 'light');
-      root.querySelectorAll('.theme-text').forEach((item) => { item.textContent = dark ? 'Modo Claro' : 'Modo Oscuro'; });
-    };
-    applyTheme(localStorage.getItem('juntapp_theme') === 'dark');
-    const toggleTheme = () => applyTheme(document.documentElement.getAttribute('data-theme') !== 'dark');
-    listen(root.querySelector('#landingThemeToggleBtn'), 'click', toggleTheme);
-    listen(root.querySelector('#landingMobileThemeToggleBtn'), 'click', toggleTheme);
-
     root.querySelectorAll('.btn-open-auth').forEach((button) => {
       listen(button, 'click', () => router.push(button.getAttribute('data-tab') === 'register' ? '/registro' : '/login'));
     });
@@ -135,7 +124,7 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
         if (fill) fill.style.width = values[index];
       });
       const status = root.querySelector<HTMLElement>('#bento-poll-status');
-      if (status) status.textContent = '¡Voto registrado con éxito! Gracias por participar.';
+      if (status) status.textContent = '¡Respuesta registrada con éxito! Gracias por participar.';
     }) as EventListener);
 
     const billing = root.querySelector('#billingToggleBtn');

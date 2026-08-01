@@ -84,9 +84,9 @@ Presidencia conecta la cuenta Mercado Pago de la junta desde Tesorería usando O
 
 Las direcciones se normalizan dentro de PostgreSQL antes de asignar el domicilio. Se ignoran mayúsculas, tildes, puntuación, espacios, símbolos de número y variantes habituales como `Avenida`/`Av.`, `Pasaje`/`Pje.`, `Departamento`/`Dpto.` o `Camino`/`Cno.`. Una restricción única evita duplicados aun bajo solicitudes concurrentes y un trigger impide asociar manualmente un socio a un domicilio incompatible con su dirección.
 
-## Propuestas de votación
+## Propuestas de consulta
 
-Los socios pueden enviar propuestas con contexto y alternativas. La propuesta permanece pendiente y solo se convierte en una votación activa cuando la directiva la aprueba. Los rechazos exigen un motivo y tanto la revisión como la votación resultante quedan vinculadas para auditoría.
+Los socios pueden enviar propuestas con contexto y alternativas. La propuesta permanece pendiente y solo se convierte en una consulta activa cuando la directiva la aprueba. Los rechazos exigen un motivo y tanto la revisión como la consulta resultante quedan vinculadas para auditoría.
 
 En la aplicación de Mercado Pago registra exactamente esta URL de redirección:
 

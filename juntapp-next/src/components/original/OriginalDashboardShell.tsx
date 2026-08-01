@@ -13,7 +13,7 @@ const navigation = [
   { route: 'inicio', label: 'Inicio', icon: 'home' },
   { route: 'socios', label: 'Registro de Socios', icon: 'users' },
   { route: 'tesoreria', label: 'Tesorería Transparente', icon: 'money' },
-  { route: 'votaciones', label: 'Votaciones Digitales', icon: 'vote' },
+  { route: 'consultas', label: 'Consultas Comunitarias', icon: 'vote' },
   { route: 'comunicaciones', label: 'Anuncios Oficiales', icon: 'mail' },
   { route: 'mi-pagina', label: 'Mi Página Web', icon: 'website' },
 ] as const;
@@ -39,7 +39,6 @@ export default function OriginalDashboardShell({ profile, junta, trialEndsAt, ch
   const pathname = usePathname();
   const currentRoute = pathname.split('/')[1] || 'inicio';
   const [collapsed, setCollapsed] = useState(false);
-  const [dark, setDark] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -61,15 +60,6 @@ export default function OriginalDashboardShell({ profile, junta, trialEndsAt, ch
 
   function toggleCollapsed() {
     setCollapsed((value) => { localStorage.setItem('juntapp_sidebar_collapsed', String(!value)); return !value; });
-  }
-
-  function toggleTheme() {
-    setDark((value) => {
-      const next = !value;
-      if (next) document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('juntapp_theme', next ? 'dark' : 'light');
-      return next;
-    });
   }
 
   async function logout() {
@@ -111,14 +101,13 @@ export default function OriginalDashboardShell({ profile, junta, trialEndsAt, ch
         </nav>
         <div className="sidebar-footer">
           <button className="theme-btn notifications-bell-btn" id="bellToggle" onClick={() => setNotificationsOpen((value) => !value)}><span className="bell-icon-wrapper"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</span><span>Notificaciones</span></button>
-          <button className="theme-btn" id="themeToggle" onClick={toggleTheme}><span aria-hidden="true">{dark ? '☀' : '☾'}</span><span>{dark ? 'Modo Claro' : 'Modo Oscuro'}</span></button>
           <button className="theme-btn dashboard-logout-btn" type="button" onClick={logout}><span aria-hidden="true">↪</span><span>Cerrar sesión</span></button>
           <div className="purocode-signature">Powered by <strong>PuroCode</strong></div>
         </div>
       </aside>
       <main className="app-main-content" id="mainContent">
-        <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-theme-btn" id="mobileThemeToggle" onClick={toggleTheme} aria-label="Cambiar tema">{dark ? '☀' : '☾'}</button><button className="mobile-menu-toggle" type="button" aria-label={mobileMenuOpen?'Cerrar menú':'Abrir menú'} aria-expanded={mobileMenuOpen} onClick={()=>setMobileMenuOpen((value)=>!value)}><span/><span/><span/></button></div></header>
-        {mobileMenuOpen&&<div className="mobile-navigation-menu" role="navigation" aria-label="Menú principal">{visibleNavigation.map((item)=><Link href={item.href} className={`mobile-navigation-link ${currentRoute===item.route?'active':''}`} key={item.route} onClick={()=>setMobileMenuOpen(false)}><NavIcon icon={item.icon}/><span>{item.label}</span></Link>)}<div className="mobile-menu-secondary"><button type="button" onClick={toggleTheme}>{dark?'Modo claro':'Modo oscuro'}</button><button type="button" className="logout" onClick={logout}>Cerrar sesión</button></div></div>}
+        <header className="mobile-header"><div className="mobile-logo"><BrandMark size={36} /><span>Junt<strong>APP</strong></span></div><div className="mobile-header-actions"><button className="mobile-bell-btn" id="mobileBellToggle" onClick={() => setNotificationsOpen((value) => !value)} aria-label="Ver notificaciones"><BellIcon />{unreadCount > 0 && <span className="bell-badge">{unreadCount}</span>}</button><button className="mobile-menu-toggle" type="button" aria-label={mobileMenuOpen?'Cerrar menú':'Abrir menú'} aria-expanded={mobileMenuOpen} onClick={()=>setMobileMenuOpen((value)=>!value)}><span/><span/><span/></button></div></header>
+        {mobileMenuOpen&&<div className="mobile-navigation-menu" role="navigation" aria-label="Menú principal">{visibleNavigation.map((item)=><Link href={item.href} className={`mobile-navigation-link ${currentRoute===item.route?'active':''}`} key={item.route} onClick={()=>setMobileMenuOpen(false)}><NavIcon icon={item.icon}/><span>{item.label}</span></Link>)}<div className="mobile-menu-secondary"><button type="button" className="logout" onClick={logout}>Cerrar sesión</button></div></div>}
         {trialEndsAt && (
           <div className="mx-4 mt-4 border-4 border-black bg-[#fff4a3] px-4 py-3 text-[#071b34] shadow-[4px_4px_0_#000] sm:mx-6">
             <p className="text-xs font-black uppercase">Período gratuito hasta {new Intl.DateTimeFormat('es-CL').format(new Date(trialEndsAt))}</p>

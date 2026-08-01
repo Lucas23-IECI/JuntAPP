@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 const tours: Record<string, DriveStep[]> = {
   inicio: [
     { element: '#view-inicio .view-header', popover: { title: 'Panel de Inicio', description: 'Resumen en tiempo real del estado de tu comunidad.' } },
-    { element: '#view-inicio .stats-grid', popover: { title: 'Métricas Vecinales', description: 'Caja disponible, padrón, votaciones y estado de cuota.' } },
+    { element: '#view-inicio .stats-grid', popover: { title: 'Métricas Vecinales', description: 'Caja disponible, padrón, consultas y estado de cuota.' } },
     { element: '#view-inicio .split-grid', popover: { title: 'Anuncios y Ayuda', description: 'Revisa comunicados recientes y accesos rápidos.' } },
   ],
   socios: [
@@ -19,9 +19,9 @@ const tours: Record<string, DriveStep[]> = {
     { element: '#view-tesoreria .charts-grid', popover: { title: 'Gráficos Financieros', description: 'Distribución y evolución de los movimientos.' } },
     { element: '#view-tesoreria .document-center', popover: { title: 'Transparencia', description: 'Documentos oficiales disponibles para los vecinos.' } },
   ],
-  votaciones: [
-    { element: '#view-votaciones .active-poll-widget', popover: { title: 'Consulta en Curso', description: 'Emite un voto único y consulta los resultados autorizados.' } },
-    { element: '#view-votaciones .past-polls-widget', popover: { title: 'Historial', description: 'Revisa las decisiones anteriores de la comunidad.' } },
+  consultas: [
+    { element: '#view-consultas .active-poll-widget', popover: { title: 'Consulta en Curso', description: 'Registra una respuesta y revisa los resultados publicados.' } },
+    { element: '#view-consultas .past-polls-widget', popover: { title: 'Historial', description: 'Revisa las consultas anteriores de la comunidad.' } },
   ],
   comunicaciones: [
     { element: '#view-comunicaciones .view-header', popover: { title: 'Anuncios Oficiales', description: 'Canal formal de comunicación de la directiva.' } },

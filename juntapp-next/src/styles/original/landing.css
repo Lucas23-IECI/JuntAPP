@@ -359,7 +359,7 @@
   color: var(--accent-orange);
 }
 
-.mini-badge-votos {
+.mini-badge-respuestas {
   background: rgba(59, 130, 246, 0.15);
   color: #60a5fa;
   border: 1px solid rgba(59, 130, 246, 0.3);
@@ -1911,57 +1911,6 @@ textarea.form-input {
   }
 }
 
-/* ==========================================================================
-   THEME TOGGLES & PREMIUM STYLING IMPROVEMENTS
-   ========================================================================== */
-.btn-theme-toggle {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.btn-theme-toggle:hover {
-  background: var(--border);
-  color: var(--text);
-}
-
-.btn-theme-toggle .sun-icon {
-  display: none;
-}
-
-.btn-theme-toggle .moon-icon {
-  display: block;
-}
-
-body[data-theme="dark"] .btn-theme-toggle .sun-icon {
-  display: block;
-  color: #ffb84c;
-}
-
-body[data-theme="dark"] .btn-theme-toggle .moon-icon {
-  display: none;
-}
-
-/* Mobile theme toggle layout override */
-#landingMobileThemeToggleBtn .sun-icon {
-  color: #ffb84c;
-}
-
-body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .sun-icon {
-  display: none;
-}
-body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
-  display: block;
-  color: var(--text-secondary);
-}
-
 /* Mobile responsive mockups dimensions */
 @media (max-width: 768px) {
   .hero-visual {
@@ -2250,7 +2199,7 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   font-weight: 600;
 }
 
-/* 3. Votaciones Mockup */
+/* 3. Consultas Mockup */
 .poll-question {
   font-family: 'Outfit', sans-serif;
   font-size: 0.85rem;
@@ -3063,10 +3012,6 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   align-items: center !important;
   gap: 12px !important;
   margin-left: auto !important; /* Push Acceder/Registrarse to the far right */
-}
-
-.style-swiss .landing-nav-actions .btn-theme-toggle {
-  color: #031636 !important;
 }
 
 .style-swiss .landing-nav-actions .btn-sm {
@@ -3913,11 +3858,6 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   background-color: #f0f6ff !important;
 }
 
-/* Theme Toggle Hide */
-.btn-theme-toggle {
-  display: none !important;
-}
-
 /* Chalkboard Neighbors list status badges and contrast overrides */
 .style-swiss .widget-socio-item-mural .socio-name {
   color: #ffffff !important;
@@ -4179,7 +4119,7 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   padding-top: 44px !important; /* offset for red pin */
 }
 
-/* Card 3: Sticky Note (Votaciones) */
+/* Card 3: Sticky Note (Consultas) */
 .style-swiss .bento-card-sticky {
   --orig-rot: 2deg;
   transform: rotate(var(--orig-rot)) !important;
@@ -4530,8 +4470,8 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   color: #031636 !important;
 }
 
-/* --- WIDGET 3: STICKY VOTACIONES --- */
-.style-swiss .widget-votaciones-mural {
+/* --- WIDGET 3: CONSULTAS --- */
+.style-swiss .widget-consultas-mural {
   margin-top: auto !important;
   background: rgba(0, 0, 0, 0.03) !important;
   border: 1px dashed rgba(0, 0, 0, 0.15) !important;
@@ -4589,19 +4529,19 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   box-shadow: 0 0 6px rgba(0,0,0,0.2) !important;
 }
 
-.style-swiss .widget-votaciones-mural .option-label {
+.style-swiss .widget-consultas-mural .option-label {
   font-size: 0.8rem !important;
   font-weight: 700 !important;
   color: #0f172a !important;
 }
 
-.style-swiss .widget-votaciones-mural .option-percent {
+.style-swiss .widget-consultas-mural .option-percent {
   font-size: 0.8rem !important;
   font-weight: 900 !important;
   color: #0f172a !important;
 }
 
-.style-swiss .widget-votaciones-mural .poll-bar-track {
+.style-swiss .widget-consultas-mural .poll-bar-track {
   width: 100% !important;
   height: 5px !important;
   background: rgba(0, 0, 0, 0.06) !important;
@@ -4611,7 +4551,7 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
   overflow: hidden !important;
 }
 
-.style-swiss .widget-votaciones-mural .poll-bar-fill {
+.style-swiss .widget-consultas-mural .poll-bar-fill {
   height: 100% !important;
   background: rgba(0, 0, 0, 0.4) !important;
   border-radius: 10px !important;
@@ -5659,11 +5599,6 @@ body:not([data-theme="dark"]) #landingMobileThemeToggleBtn .moon-icon {
 }
 .style-swiss .widget-socio-item-mural .socio-status-badge.status-pending:hover {
   background: rgba(251, 146, 60, 0.3) !important;
-}
-
-/* Theme Toggle Hide globally in Swiss style */
-#themeToggle, #mobileThemeToggle, .mobile-theme-btn {
-  display: none !important;
 }
 
 /* Subpage features detailed mockups styles */
