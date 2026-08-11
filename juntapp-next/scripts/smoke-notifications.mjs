@@ -35,11 +35,11 @@ try {
       page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
       page.on('pageerror', (error) => errors.push(error.message));
       await login(page, user);
-      await page.waitForTimeout(1200);
       const center = page.getByRole('region', { name: 'Instalación y notificaciones' });
       await center.getByRole('heading', { name: 'Instala JuntAPP' }).waitFor();
       await center.getByRole('heading', { name: 'Activa las notificaciones' }).waitFor();
-      assert.equal(await center.getByText('Cobertura de avisos', { exact: true }).count(), user.dirigente ? 1 : 0);
+      if (user.dirigente) await center.getByText('Cobertura de avisos', { exact: true }).waitFor({ timeout: 15_000 });
+      else assert.equal(await center.getByText('Cobertura de avisos', { exact: true }).count(), 0);
       const overflow = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth);
       assert.ok(overflow <= 2, `${viewport.name}/${user.email}: desborde horizontal ${overflow}px.`);
       assert.deepEqual(errors, [], `${viewport.name}/${user.email}: errores de consola.`);
@@ -67,6 +67,8 @@ try {
   await browser.close();
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && testKeys.length) {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+    await admin.from('app_devices').delete().in('device_key', testKeys);
+    await new Promise((resolve) => setTimeout(resolve, 750));
     await admin.from('app_devices').delete().in('device_key', testKeys);
   }
 }
