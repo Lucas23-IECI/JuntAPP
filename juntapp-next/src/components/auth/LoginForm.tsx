@@ -20,7 +20,7 @@ export default function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -32,7 +32,7 @@ export default function LoginForm() {
         return;
       }
 
-      const { data: profile } = await supabase.from('profiles').select('role, juntas(subscription_plan)').single();
+      const { data: profile } = await supabase.from('profiles').select('role, juntas(subscription_plan)').eq('id', authData.user.id).single();
       const junta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
       router.push(profile?.role === 'dirigente' && junta?.subscription_plan === 'web' ? '/mi-pagina' : '/inicio');
       router.refresh();

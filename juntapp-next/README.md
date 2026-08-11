@@ -84,6 +84,10 @@ Presidencia conecta la cuenta Mercado Pago de la junta desde Tesorería usando O
 
 Las direcciones se normalizan dentro de PostgreSQL antes de asignar el domicilio. Se ignoran mayúsculas, tildes, puntuación, espacios, símbolos de número y variantes habituales como `Avenida`/`Av.`, `Pasaje`/`Pje.`, `Departamento`/`Dpto.` o `Camino`/`Cno.`. Una restricción única evita duplicados aun bajo solicitudes concurrentes y un trigger impide asociar manualmente un socio a un domicilio incompatible con su dirección.
 
+### Conciliación automática de Tesorería
+
+La cuenta conectada también alimenta el libro de caja mediante el reporte de movimientos de Mercado Pago. Presidencia o Tesorería pueden solicitar una sincronización desde el módulo y el cron `/api/cron/treasury-reconciliation` la continúa diariamente. Los cobros conservan monto bruto, comisión y monto neto; devoluciones y contracargos afectan el saldo, mientras que los retiros a la cuenta bancaria se clasifican como transferencias internas y no como gastos. Los movimientos conciliados son idempotentes, quedan marcados como verificados y no pueden ser editados o eliminados por usuarios autenticados.
+
 ## Propuestas de consulta
 
 Los socios pueden enviar propuestas con contexto y alternativas. La propuesta permanece pendiente y solo se convierte en una consulta activa cuando la directiva la aprueba. Los rechazos exigen un motivo y tanto la revisión como la consulta resultante quedan vinculadas para auditoría.

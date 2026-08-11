@@ -88,6 +88,20 @@ export interface Transaction {
   date: string;
   created_by: string | null;
   created_at: string;
+  source?: 'manual' | 'mercadopago' | 'bank_import';
+  accounting_kind?: 'income' | 'expense' | 'transfer' | 'adjustment';
+  account_code?: string;
+  destination_account_code?: string | null;
+  category?: string | null;
+  gross_amount?: number;
+  fee_amount?: number;
+  net_amount?: number;
+  provider?: string | null;
+  provider_transaction_id?: string | null;
+  external_reference?: string | null;
+  verification_status?: 'manual' | 'provider_confirmed' | 'reconciled';
+  verified_at?: string | null;
+  is_immutable?: boolean;
 }
 
 export interface Poll {
@@ -189,4 +203,10 @@ export interface MercadoPagoConnectionSummary {
   mercadoPagoUserId: number | null;
   connectedAt: string | null;
   oauthConfigured: boolean;
+}
+
+export interface TreasurySyncStatus {
+  lastCompletedAt: string | null;
+  lastImportedCount: number;
+  pending: boolean;
 }

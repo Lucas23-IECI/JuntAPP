@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/subscription-trials",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/treasury-reconciliation",
+      "schedule": "20 12 * * *"
     }
   ]
 }

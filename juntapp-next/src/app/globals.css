@@ -56,6 +56,14 @@
 .transaction-type { font-weight: 700; text-transform: capitalize; }
 .transaction-type.ingreso, .amount-ingreso { color: var(--success); }
 .transaction-type.egreso, .amount-egreso { color: var(--accent); }
+.transaction-type.transferencia, .amount-transferencia { color: #2563eb; }
+.transaction-description { display: grid; gap: 6px; min-width: 220px; }
+.transaction-metadata { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--text-secondary); font-size: .72rem; }
+.verification-badge { display: inline-flex; align-items: center; width: fit-content; padding: 3px 7px; border: 1px solid currentColor; border-radius: 999px; font-size: .68rem; font-weight: 800; line-height: 1.2; }
+.verification-badge.verified { color: #087443; background: #e7f8ef; }
+.verification-badge.pending { color: #8a5200; background: #fff7d6; }
+.verification-badge.manual { color: #5b6472; background: #f3f4f6; }
+.treasury-sync-status { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; color: var(--text-secondary); font-size: .8rem; }
 .visible { display: block !important; }
 .poll-option-editor { display: flex; gap: 8px; margin-bottom: 8px; }
 .announcement-admin-actions { margin-top: 10px; border-top: 1.5px solid var(--border); padding-top: 14px; }

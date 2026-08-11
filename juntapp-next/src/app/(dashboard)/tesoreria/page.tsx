@@ -20,7 +20,7 @@ export default async function TesoreriaPage({ searchParams }: { searchParams: Pr
 
   const { data: transactions } = await supabase
     .from('transactions')
-    .select('*')
+    .select('id, junta_id, type, description, amount, date, created_by, created_at, source, accounting_kind, account_code, destination_account_code, category, gross_amount, fee_amount, net_amount, verification_status, verified_at, is_immutable')
     .eq('junta_id', profile?.junta_id)
     .order('date', { ascending: false });
 
@@ -37,6 +37,11 @@ export default async function TesoreriaPage({ searchParams }: { searchParams: Pr
     .select('mercadopago_user_id, connected_at')
     .eq('junta_id', profile.junta_id)
     .maybeSingle() : { data: null };
+  const admin = createAdminClient();
+  const [{ data: lastTreasurySync }, { data: pendingTreasurySync }] = profile ? await Promise.all([
+    admin.from('treasury_sync_runs').select('completed_at, imported_count').eq('junta_id', profile.junta_id).eq('status', 'completed').order('completed_at', { ascending: false }).limit(1).maybeSingle(),
+    admin.from('treasury_sync_runs').select('id').eq('junta_id', profile.junta_id).in('status', ['pending', 'processing']).limit(1).maybeSingle(),
+  ]) : [{ data: null }, { data: null }];
   const params = await searchParams;
 
   const { data: households } = await supabase
@@ -81,6 +86,11 @@ export default async function TesoreriaPage({ searchParams }: { searchParams: Pr
         mercadoPagoUserId: mercadoPagoAccount?.mercadopago_user_id ?? null,
         connectedAt: mercadoPagoAccount?.connected_at ?? null,
         oauthConfigured: mercadoPagoConnectConfigured(),
+      }}
+      treasurySyncStatus={{
+        lastCompletedAt: lastTreasurySync?.completed_at ?? null,
+        lastImportedCount: Number(lastTreasurySync?.imported_count ?? 0),
+        pending: Boolean(pendingTreasurySync),
       }}
       totalHouseholds={households?.length ?? 0}
       paidHouseholds={new Set((paidHouseholdDues ?? []).map((due) => due.household_id)).size}

@@ -20,12 +20,15 @@ export default function CashflowChart({ transactions }: { transactions: Transact
     const months: Record<string, { income: number; expenses: number }> = {};
 
     transactions.forEach((tx) => {
+      const kind = tx.accounting_kind ?? (tx.type === 'ingreso' ? 'income' : 'expense');
+      if (kind === 'transfer') return;
       const month = tx.date.slice(0, 7); // YYYY-MM
       if (!months[month]) months[month] = { income: 0, expenses: 0 };
-      if (tx.type === 'ingreso') {
-        months[month].income += Number(tx.amount);
+      if (kind === 'income') {
+        months[month].income += Number(tx.gross_amount ?? tx.amount);
+        months[month].expenses += Number(tx.fee_amount ?? 0);
       } else {
-        months[month].expenses += Number(tx.amount);
+        months[month].expenses += Math.abs(Number(tx.net_amount ?? tx.amount));
       }
     });
 

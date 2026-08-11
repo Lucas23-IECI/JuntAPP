@@ -15,7 +15,8 @@ export default function AcceptInviteForm() {
     const supabase = createClient();
     const { error: updateError } = await supabase.auth.updateUser({ password });
     if (updateError) { setError('El enlace expiró o no es válido. Solicita una nueva invitación.'); setLoading(false); return; }
-    const { data: profile } = await supabase.from('profiles').select('role, juntas(subscription_plan)').single();
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = await supabase.from('profiles').select('role, juntas(subscription_plan)').eq('id', user!.id).single();
     const junta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
     router.push(profile?.role === 'dirigente' && junta?.subscription_plan === 'web' ? '/mi-pagina' : '/inicio');
     router.refresh();

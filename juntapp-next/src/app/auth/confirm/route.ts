@@ -32,7 +32,8 @@ export async function POST(request: Request) {
   const { error: passwordError } = await supabase.auth.updateUser({ password });
   if (passwordError) return NextResponse.redirect(new URL('/aceptar-invitacion', origin), 303);
 
-  const { data: profile } = await supabase.from('profiles').select('role, juntas(subscription_plan)').single();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = await supabase.from('profiles').select('role, juntas(subscription_plan)').eq('id', user!.id).single();
   const junta = Array.isArray(profile?.juntas) ? profile.juntas[0] : profile?.juntas;
   const destination = profile?.role === 'dirigente' && junta?.subscription_plan === 'web' ? '/mi-pagina' : '/inicio';
   return NextResponse.redirect(new URL(destination, origin), 303);
