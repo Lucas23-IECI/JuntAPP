@@ -5,7 +5,7 @@ export type BoardPosition = 'presidente' | 'secretario' | 'tesorero' | 'dirigent
 export type CuotaStatus = 'al_dia' | 'pendiente';
 export type TransactionType = 'ingreso' | 'egreso';
 export type AnnouncementCategory = 'urgente' | 'asamblea' | 'beneficio' | 'general';
-export type NotificationType = 'asamblea' | 'votacion' | 'cuota' | 'seguridad' | 'registro' | 'propuesta';
+export type NotificationType = 'asamblea' | 'votacion' | 'cuota' | 'seguridad' | 'registro' | 'propuesta' | 'general';
 
 export interface Junta {
   id: string;

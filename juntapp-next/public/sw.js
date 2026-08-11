@@ -10,18 +10,22 @@ self.addEventListener('push', (event) => {
     data = fallback;
   }
 
-  event.waitUntil(self.registration.showNotification(data.title, {
-    body: data.message,
-    icon: '/icons/pwa/icon-192.png',
-    badge: '/icons/notification-badge.png',
-    tag: data.tag,
-    renotify: Boolean(data.tag),
-    data: { action: data.action },
-  }));
+  event.waitUntil(Promise.all([
+    self.registration.showNotification(data.title, {
+      body: data.message,
+      icon: '/icons/pwa/icon-192.png',
+      badge: '/icons/notification-badge.png',
+      tag: data.tag,
+      renotify: Boolean(data.tag),
+      data: { action: data.action },
+    }),
+    'setAppBadge' in self.registration ? self.registration.setAppBadge(1) : Promise.resolve(),
+  ]));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  if ('clearAppBadge' in self.registration) void self.registration.clearAppBadge();
   const requestedAction = event.notification.data?.action || '/inicio';
   const requestedUrl = new URL(requestedAction, self.location.origin);
   const targetUrl = requestedUrl.origin === self.location.origin

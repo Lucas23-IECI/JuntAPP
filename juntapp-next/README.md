@@ -51,6 +51,8 @@ npx supabase db push
 - `MERCADOPAGO_CREDENTIALS_ENCRYPTION_KEY`: secreto aleatorio de 32 caracteres o más para cifrar Access y Refresh Tokens por junta.
 - `MERCADOPAGO_OAUTH_TEST_MODE`: usa `true` en sandbox y `false` en producción.
 - `MERCADOPAGO_WEBHOOK_SECRET`: firma secreta configurada en Webhooks de Mercado Pago para producción.
+- `WEB_PUSH_VAPID_PUBLIC_KEY` y `WEB_PUSH_VAPID_PRIVATE_KEY`: claves estables para Web Push. Si no están definidas, el servidor deriva un par estable desde `MERCADOPAGO_CREDENTIALS_ENCRYPTION_KEY`.
+- `WEB_PUSH_VAPID_SUBJECT`: contacto VAPID opcional; por defecto `mailto:soporte@juntapp.cl`.
 - `RESEND_API_KEY`: credencial privada de Resend para enviar la carta de solicitud a Secretaría.
 - `REGISTRATION_EMAIL_FROM`: remitente verificado opcional. Si no se define, se usa `JuntAPP <solicitudes@juntapp.cl>`.
 
@@ -87,6 +89,19 @@ Las direcciones se normalizan dentro de PostgreSQL antes de asignar el domicilio
 ### Conciliación automática de Tesorería
 
 La cuenta conectada también alimenta el libro de caja mediante el reporte de movimientos de Mercado Pago. Presidencia o Tesorería pueden solicitar una sincronización desde el módulo y el cron `/api/cron/treasury-reconciliation` la continúa diariamente. Los cobros conservan monto bruto, comisión y monto neto; devoluciones y contracargos afectan el saldo, mientras que los retiros a la cuenta bancaria se clasifican como transferencias internas y no como gastos. Los movimientos conciliados son idempotentes, quedan marcados como verificados y no pueden ser editados o eliminados por usuarios autenticados.
+
+## Instalación y notificaciones push
+
+JuntAPP se instala como PWA desde el Centro de instalación del Panel de Inicio. Android y escritorio usan el aviso nativo del navegador; iPhone muestra una guía visual para Compartir → Agregar a inicio y solo permite activar Web Push después de abrir la app instalada. Cada dispositivo queda registrado sin exponer su identidad a otros vecinos y puede desactivar sus notificaciones de forma independiente.
+
+Comunicados, consultas publicadas, propuestas revisadas y actualizaciones del sitio comunitario crean notificaciones internas y un trabajo push idempotente. La directiva ve cobertura, dispositivos activos, estado de los últimos envíos y puede reintentar fallos. Además, `/api/cron/push-notifications` procesa diariamente trabajos pendientes como respaldo.
+
+Pruebas específicas:
+
+```bash
+npm run test:notifications:db
+npm run smoke:notifications
+```
 
 ## Propuestas de consulta
 

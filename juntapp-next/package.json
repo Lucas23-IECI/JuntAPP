@@ -7,13 +7,15 @@
     "demo:neighbors": "node scripts/seed-demo-neighbors.mjs",
     "smoke:demo-navigation": "node scripts/smoke-demo-navigation.mjs",
     "smoke:treasury": "node scripts/smoke-treasury.mjs",
+    "smoke:notifications": "node --env-file=.env.local scripts/smoke-notifications.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "audit:public": "node scripts/audit-public-pages.mjs",
     "test:treasury": "node --experimental-strip-types scripts/test-treasury-reconciliation.mjs",
-    "test:treasury:db": "node --env-file=.env.local scripts/integration-treasury-supabase.mjs"
+    "test:treasury:db": "node --env-file=.env.local scripts/integration-treasury-supabase.mjs",
+    "test:notifications:db": "node --env-file=.env.local scripts/integration-notifications-supabase.mjs"
   },
   "dependencies": {
     "@mercadopago/sdk-react": "^1.0.7",

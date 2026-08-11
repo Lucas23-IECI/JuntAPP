@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/treasury-reconciliation",
       "schedule": "20 12 * * *"
+    },
+    {
+      "path": "/api/cron/push-notifications",
+      "schedule": "40 12 * * *"
     }
   ]
 }

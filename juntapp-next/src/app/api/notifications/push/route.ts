@@ -1,17 +1,18 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { rateLimit } from '@/lib/rate-limit';
 import { createClient } from '@/lib/supabase/server';
 import { publicAppUrl, sendEmailBestEffort } from '@/lib/email';
 import { dueReminderTemplate } from '@/lib/email-templates';
-import { sendPushToUsers } from '@/lib/web-push';
+import { processPendingPushJobs, queuePushNotification } from '@/lib/web-push';
 
 const notificationSchema = z.object({
-  type: z.enum(['asamblea', 'votacion', 'cuota', 'seguridad']),
+  type: z.enum(['asamblea', 'votacion', 'cuota', 'seguridad', 'general']),
   title: z.string().trim().min(3).max(160),
   message: z.string().trim().min(3).max(500),
   action: z.string().trim().max(250).nullable().optional(),
   onlyPending: z.boolean().optional(),
+  eventKey: z.string().trim().min(3).max(240).optional(),
 });
 
 export async function POST(request: Request) {
@@ -73,12 +74,18 @@ export async function POST(request: Request) {
     }
   }
 
-  const push = await sendPushToUsers(rows.map((row) => row.user_id), {
+  const push = await queuePushNotification({
+    juntaId: profile.junta_id,
+    eventKey: parsed.data.eventKey ?? `manual:${parsed.data.type}:${user.id}:${Date.now()}`,
+    notificationType: parsed.data.type,
+    recipientUserIds: rows.map((row) => row.user_id),
     title: parsed.data.title,
     message: parsed.data.message,
     action: parsed.data.action ?? '/inicio',
     tag: `${parsed.data.type}:${profile.junta_id}`,
+    createdBy: user.id,
   });
+  after(() => processPendingPushJobs(3));
 
   if (parsed.data.type === 'cuota' && parsed.data.onlyPending) {
     const junta = Array.isArray(profile.juntas) ? profile.juntas[0] : profile.juntas;
@@ -100,5 +107,12 @@ export async function POST(request: Request) {
     }));
   }
 
-  return NextResponse.json({ delivered: rows.length, pushDelivered: push.delivered, pushSubscriptions: push.subscriptions });
+  return NextResponse.json({
+    delivered: rows.length,
+    pushJobId: push?.id ?? null,
+    pushStatus: push?.status ?? 'pending',
+    pushDelivered: push?.delivered_count ?? 0,
+    pushSubscriptions: push?.subscription_count ?? 0,
+    pushFailed: push?.failed_count ?? 0,
+  });
 }

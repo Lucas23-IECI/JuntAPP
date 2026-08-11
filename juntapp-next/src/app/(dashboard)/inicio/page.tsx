@@ -44,7 +44,7 @@ export default async function InicioPage() {
         <div className="view-actions"><button className="tour-help-btn"><span>?</span><span>Guía</span></button><div className="date-badge">{month.charAt(0).toUpperCase() + month.slice(1)}</div></div>
       </header>
 
-      <InicioAlerts urgent={urgent?.content} />
+      <InicioAlerts urgent={urgent?.content} isDirigente={profile?.role === 'dirigente'} />
 
       <div className="stats-grid">
         <div className="stat-card note-yellow-v3"><div className="stat-icon income"><Icon type="money" /></div><div className="stat-details"><span className="stat-label">Caja Disponible</span><h3 className="stat-value">{formatCurrency(income - expenses)}</h3><span className="stat-trend success">✔ Cuentas transparentes</span></div></div>

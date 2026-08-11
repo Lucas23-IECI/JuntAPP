@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rate-limit';
-import { sendPushToUsers } from '@/lib/web-push';
+import { queuePushNotification } from '@/lib/web-push';
 
 const schema = z.object({
   title: z.string().trim().min(5).max(160),
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   const { data: board } = await admin.from('profiles').select('id').eq('junta_id', profile.junta_id).eq('role', 'dirigente');
   if (board?.length) {
     await admin.from('notifications').insert(board.map((member) => ({ user_id: member.id, type: 'propuesta', title: 'Nueva propuesta de consulta', message: `${profile.name} propuso: ${proposal.title}`, read: false, date: new Date().toISOString(), action: '/consultas' })));
-    await sendPushToUsers(board.map((member) => member.id), { title: 'Nueva propuesta de consulta', message: `${profile.name} propuso: ${proposal.title}`, action: '/consultas', tag: `propuesta:${proposal.id}` });
+    await queuePushNotification({ juntaId: profile.junta_id, eventKey: `proposal:${proposal.id}`, notificationType: 'propuesta', recipientUserIds: board.map((member) => member.id), title: 'Nueva propuesta de consulta', message: `${profile.name} propuso: ${proposal.title}`, action: '/consultas', tag: `proposal:${proposal.id}`, createdBy: user.id });
   }
   return NextResponse.json({ proposal }, { status: 201 });
 }
