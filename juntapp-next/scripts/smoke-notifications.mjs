@@ -63,6 +63,20 @@ try {
   assert.ok(iosOverflow <= 2, `iPhone: desborde horizontal ${iosOverflow}px.`);
   console.log(JSON.stringify({ ui: 'OK', viewport: 'iphone', visualCards: 3, overflow: iosOverflow }));
   await ios.close();
+
+  const androidKey = 'android-install-instructions-test';
+  testKeys.push(androidKey);
+  const android = await browser.newContext({ viewport: { width: 390, height: 844 }, userAgent: 'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/140.0.0.0 Mobile Safari/537.36' });
+  await android.addInitScript((storedKey) => localStorage.setItem('juntapp-device-key', storedKey), androidKey);
+  const androidPage = await android.newPage();
+  await login(androidPage, users[1]);
+  await androidPage.getByRole('button', { name: 'Cómo instalar' }).click();
+  await androidPage.getByText('En Android, abre el menú ⋮ de Chrome', { exact: false }).waitFor();
+  assert.equal(await androidPage.getByRole('dialog', { name: 'Lleva JuntAPP a tu iPhone' }).count(), 0);
+  const androidOverflow = await androidPage.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth);
+  assert.ok(androidOverflow <= 2, `Android: desborde horizontal ${androidOverflow}px.`);
+  console.log(JSON.stringify({ ui: 'OK', viewport: 'android', iphoneGuideHidden: true, overflow: androidOverflow }));
+  await android.close();
 } finally {
   await browser.close();
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && testKeys.length) {

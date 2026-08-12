@@ -161,8 +161,14 @@ export default function InicioAlerts({ urgent, isDirigente }: { urgent?: string;
   }, [refreshStatus]);
 
   async function installApp() {
-    if (platform === 'ios' || !installPrompt) {
+    if (platform === 'ios') {
       setGuideOpen(true);
+      return;
+    }
+    if (!installPrompt) {
+      setCenterMessage(platform === 'android'
+        ? 'En Android, abre el menú ⋮ de Chrome y toca “Instalar aplicación” o “Agregar a pantalla principal”.'
+        : 'Abre el menú de tu navegador y elige “Instalar JuntAPP” o “Crear acceso directo”.');
       return;
     }
     await installPrompt.prompt();
