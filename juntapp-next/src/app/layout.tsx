@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Plataforma digital para la gestión y transparencia de Juntas de Vecinos en Chile.',
   keywords: ['junta de vecinos', 'chile', 'gestión vecinal', 'transparencia', 'consultas comunitarias'],
   applicationName: 'JuntAPP',
-  manifest: '/manifest.webmanifest?v=20260812',
+  manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -17,18 +17,18 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/brand/favicon.svg?v=20260812', type: 'image/svg+xml' },
-      { url: '/icons/favicon-32x32.png?v=20260812', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/favicon-16x16.png?v=20260812', sizes: '16x16', type: 'image/png' },
+      { url: '/brand/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
     ],
-    shortcut: '/favicon.ico?v=20260812',
+    shortcut: '/favicon.ico',
     apple: [
-      { url: '/icons/apple/apple-touch-icon-180.png?v=20260812', sizes: '180x180', type: 'image/png' },
-      { url: '/icons/apple/apple-touch-icon-167.png?v=20260812', sizes: '167x167', type: 'image/png' },
-      { url: '/icons/apple/apple-touch-icon-152.png?v=20260812', sizes: '152x152', type: 'image/png' },
-      { url: '/icons/apple/apple-touch-icon-120.png?v=20260812', sizes: '120x120', type: 'image/png' },
+      { url: '/icons/apple/apple-touch-icon-180.png', sizes: '180x180', type: 'image/png' },
+      { url: '/icons/apple/apple-touch-icon-167.png', sizes: '167x167', type: 'image/png' },
+      { url: '/icons/apple/apple-touch-icon-152.png', sizes: '152x152', type: 'image/png' },
+      { url: '/icons/apple/apple-touch-icon-120.png', sizes: '120x120', type: 'image/png' },
     ],
-    other: [{ rel: 'mask-icon', url: '/brand/safari-pinned-tab.svg?v=20260812', color: '#031636' }],
+    other: [{ rel: 'mask-icon', url: '/brand/safari-pinned-tab.svg', color: '#031636' }],
   },
   other: {
     'msapplication-config': '/browserconfig.xml',

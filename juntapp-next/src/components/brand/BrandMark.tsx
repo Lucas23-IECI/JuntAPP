@@ -17,7 +17,7 @@ export default function BrandMark({ className, size = 48, title = 'JuntAPP' }: B
     >
       <rect x="64" y="64" width="896" height="896" rx="176" fill="#031636" />
       <path fill="#fff" d="M548 252h170v342c0 166-94 252-244 252-120 0-198-50-234-150l162-42c18 46 45 66 93 66 60 0 89-38 89-108V252Z" />
-      <rect x="244" y="648" width="112" height="112" rx="24" fill="#ff6b00" stroke="#031636" strokeWidth="16" />
+      <rect x="240" y="638" width="132" height="132" fill="#ff6b00" />
     </svg>
   );
 }

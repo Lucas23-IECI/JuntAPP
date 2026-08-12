@@ -1,6 +1,6 @@
 # Kit de marca JuntAPP
 
-Identidad oficial: cuadrado azul marino redondeado, `J` blanca y acento modular naranjo de esquinas suaves, separado ópticamente de la letra.
+Identidad oficial: cuadrado azul marino redondeado, `J` blanca y acento cuadrado naranjo.
 
 ## Colores
 
