@@ -14,14 +14,14 @@
   "categories": ["social", "productivity", "utilities"],
   "prefer_related_applications": false,
   "shortcuts": [
-    { "name": "Avisos oficiales", "short_name": "Avisos", "url": "/comunicaciones", "icons": [{ "src": "/icons/pwa/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Consultas vecinales", "short_name": "Consultas", "url": "/consultas", "icons": [{ "src": "/icons/pwa/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Tesorería transparente", "short_name": "Tesorería", "url": "/tesoreria", "icons": [{ "src": "/icons/pwa/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Avisos oficiales", "short_name": "Avisos", "url": "/comunicaciones", "icons": [{ "src": "/icons/pwa/icon-192.png?v=20260812", "sizes": "192x192" }] },
+    { "name": "Consultas vecinales", "short_name": "Consultas", "url": "/consultas", "icons": [{ "src": "/icons/pwa/icon-192.png?v=20260812", "sizes": "192x192" }] },
+    { "name": "Tesorería transparente", "short_name": "Tesorería", "url": "/tesoreria", "icons": [{ "src": "/icons/pwa/icon-192.png?v=20260812", "sizes": "192x192" }] }
   ],
   "icons": [
-    { "src": "/icons/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/pwa/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/icons/pwa/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/icons/pwa/icon-192.png?v=20260812", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/pwa/icon-512.png?v=20260812", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/pwa/maskable-192.png?v=20260812", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/pwa/maskable-512.png?v=20260812", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
