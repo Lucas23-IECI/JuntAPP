@@ -234,10 +234,10 @@ export default function OriginalPublicPage({ view, children }: { view?: Original
     <div ref={rootRef} className="original-public-root style-swiss" onClick={handleRootClick}>
       <a href="#mainContent" className="skip-link">Saltar al contenido principal</a>
       <div className="corporate-landing style-swiss">
-        <div dangerouslySetInnerHTML={{ __html: originalFragments.header }} />
+        <div dangerouslySetInnerHTML={{ __html: originalFragments.header.replaceAll('j-monogram-20260717', 'rounded-j-20260812') }} />
         <div dangerouslySetInnerHTML={{ __html: originalFragments.mobileNav }} />
         {children ? <div id="mainContent" className="corporate-views-wrapper">{children}</div> : <div id="mainContent" className="corporate-views-wrapper" dangerouslySetInnerHTML={{ __html: publicContent }} />}
-        <div dangerouslySetInnerHTML={{ __html: originalFragments.footer }} />
+        <div dangerouslySetInnerHTML={{ __html: originalFragments.footer.replaceAll('j-monogram-20260717', 'rounded-j-20260812') }} />
       </div>
     </div>
   );

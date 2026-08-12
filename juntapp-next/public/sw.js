@@ -13,8 +13,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(Promise.all([
     self.registration.showNotification(data.title, {
       body: data.message,
-      icon: '/icons/pwa/icon-192.png',
-      badge: '/icons/notification-badge.png',
+      icon: '/icons/pwa/icon-192.png?v=rounded-j-20260812',
+      badge: '/icons/notification-badge.png?v=rounded-j-20260812',
       tag: data.tag,
       renotify: Boolean(data.tag),
       data: { action: data.action },
