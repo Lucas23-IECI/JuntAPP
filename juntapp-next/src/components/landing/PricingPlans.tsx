@@ -1,7 +1,6 @@
 'use client';
-import { useState } from 'react';
 import Link from 'next/link';
-import { formatCLP, PLANS, type PlanId, WHATSAPP_ADDON_PRICE_CLP } from '@/lib/plans';
+import { formatCLP, PLANS, type PlanId } from '@/lib/plans';
 
 const details: Record<PlanId, string[]> = {
   juntapp: ['Hasta 500 vecinos activos', 'Socios, tesorería y caja', 'Consultas y comunicaciones', 'Administradores ilimitados'],
@@ -10,7 +9,6 @@ const details: Record<PlanId, string[]> = {
 };
 
 export default function PricingPlans() {
-  const [whatsapp, setWhatsapp] = useState(false);
   return <div className="corporate-view active" id="corp-pricing">
     <section className="landing-section subpage-mural-section">
       <div className="landing-container">
@@ -32,14 +30,13 @@ export default function PricingPlans() {
             {(Object.values(PLANS)).map((plan) => <article className={`plan-card plan-${plan.id} ${plan.id === 'juntapp_web' ? 'featured' : ''}`} key={plan.id}>
               {plan.id === 'juntapp_web' && <span className="plan-ribbon">MÁS CONVENIENTE</span>}
               <h2>{plan.name}</h2><p className="plan-audience">{plan.id === 'web' ? 'Para tener presencia pública simple y profesional.' : 'Para modernizar la gestión de la comunidad.'}</p>
-              <div className="plan-price"><small>$</small><strong>{formatCLP(plan.price + (whatsapp ? WHATSAPP_ADDON_PRICE_CLP : 0))}</strong><span>/ mes</span></div>
-              {whatsapp && <p className="price-breakdown">Plan ${formatCLP(plan.price)} + WhatsApp ${formatCLP(WHATSAPP_ADDON_PRICE_CLP)}</p>}
+              <div className="plan-price"><small>$</small><strong>{formatCLP(plan.price)}</strong><span>/ mes</span></div>
               <ul>{details[plan.id].map((item) => <li key={item}>✓ {item}</li>)}</ul>
-              <Link className="plan-buy" href={`/registro?plan=${plan.id}&whatsapp=${whatsapp ? '1' : '0'}`}>Elegir {plan.name}</Link>
+              <Link className="plan-buy" href={`/registro?plan=${plan.id}`}>Elegir {plan.name}</Link>
             </article>)}
           </section>
 
-          <label className="whatsapp-addon"><input type="checkbox" checked={whatsapp} onChange={(event) => setWhatsapp(event.target.checked)} /><span className="wa-icon">W</span><span><strong>Agregar WhatsApp masivo a cualquier plan</strong><small>Envío de avisos, recordatorios y notificaciones a los vecinos.</small></span><b>+${formatCLP(WHATSAPP_ADDON_PRICE_CLP)} / mes</b></label>
+          <div className="whatsapp-addon whatsapp-addon-upcoming"><input type="checkbox" disabled aria-label="WhatsApp masivo próximamente" /><span className="wa-icon">W</span><span><strong>WhatsApp masivo</strong><small>Envío de avisos, recordatorios y notificaciones a los vecinos.</small></span><b>PRÓXIMAMENTE</b></div>
           <p className="plans-note">El monto mostrado será exactamente el que autorices en Mercado Pago. Renovación mensual; puedes cancelar futuras renovaciones.</p>
         </div>
       </div>

@@ -7455,4 +7455,18 @@ body.style-swiss:not(.logged-out) {
   }
 }
 
+/* WhatsApp add-on availability */
+.whatsapp-addon-upcoming,
+.whatsapp-addon-upcoming input[type="checkbox"] {
+  cursor: not-allowed !important;
+}
+
+.whatsapp-addon-upcoming b {
+  background: #168b55;
+  color: #ffffff;
+  padding: 7px 11px;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+}
+
 
