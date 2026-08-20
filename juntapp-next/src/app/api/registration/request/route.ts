@@ -7,6 +7,7 @@ import { cleanRUT, validateRUT } from '@/lib/utils';
 import { rateLimit } from '@/lib/rate-limit';
 import { sendRegistrationLetter } from '@/lib/registration-letter';
 import { sendPushToUsers } from '@/lib/web-push';
+import { selectMembershipReviewer } from '@/lib/membership-review';
 
 const schema = z.object({
   name: z.string().trim().min(3).max(160),
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient();
   const rut = cleanRUT(parsed.data.rut).toUpperCase();
-  const { data: junta } = await admin.from('juntas').select('id, name, subscription_status, billing_mode, trial_ends_at').eq('invite_code', parsed.data.inviteCode).maybeSingle();
+  const { data: junta } = await admin.from('juntas').select('id, name, owner_id, subscription_status, billing_mode, trial_ends_at').eq('invite_code', parsed.data.inviteCode).maybeSingle();
   if (!junta) return NextResponse.json({ error: 'El código no corresponde a una junta registrada.' }, { status: 404 });
   const currentJunta = await expireJuntaTrialIfNeeded(junta);
   if (!juntaHasActiveAccess(currentJunta)) return NextResponse.json({ error: 'La junta no tiene una suscripción activa.' }, { status: 409 });
@@ -39,8 +40,8 @@ export async function POST(request: Request) {
   ]);
   if (existingProfile) return NextResponse.json({ error: 'El RUT o correo ya pertenece a un socio registrado.' }, { status: 409 });
   if (existingApplication) return NextResponse.json({ error: 'Ya existe una solicitud pendiente para este RUT o correo.' }, { status: 409 });
-  const secretary = board?.find((member) => member.board_position === 'secretario');
-  if (!secretary) return NextResponse.json({ error: 'La junta aún no ha designado a Secretaría. Contacta a su directiva.' }, { status: 409 });
+  const reviewer = selectMembershipReviewer(board ?? [], currentJunta.owner_id);
+  if (!reviewer) return NextResponse.json({ error: 'La junta aún no tiene una directiva habilitada para revisar solicitudes.' }, { status: 409 });
 
   const { data: application, error } = await admin.from('membership_applications').insert({
     junta_id: currentJunta.id, name: parsed.data.name, rut, address: parsed.data.address,
@@ -51,8 +52,8 @@ export async function POST(request: Request) {
   await admin.from('notifications').insert((board ?? []).map((member) => ({
     user_id: member.id,
     type: 'registro',
-    title: member.board_position === 'secretario' ? 'Solicitud pendiente de tu aprobación' : 'Copia: nueva solicitud de socio',
-    message: `${application.name} solicita ingresar desde ${application.address}. ${member.board_position === 'secretario' ? 'Revisa y resuelve la solicitud.' : 'Secretaría debe resolverla.'}`,
+    title: member.id === reviewer.id ? 'Solicitud pendiente de tu aprobación' : 'Copia: nueva solicitud de socio',
+    message: `${application.name} solicita ingresar desde ${application.address}. ${member.id === reviewer.id ? 'Revisa y resuelve la solicitud.' : 'La persona responsable de la directiva debe resolverla.'}`,
     read: false, date: new Date().toISOString(), action: '/socios',
   })));
   await sendPushToUsers((board ?? []).map((member) => member.id), {
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
   let deliveryStatus: 'sent' | 'in_app' | 'failed' = 'in_app';
   try {
     const delivery = await sendRegistrationLetter({
-      secretaryEmail: secretary.email, boardEmails: (board ?? []).map((member) => member.email),
+      reviewerEmail: reviewer.email, boardEmails: (board ?? []).map((member) => member.email),
       juntaName: currentJunta.name, applicantName: application.name, applicantRut: application.rut,
       applicantAddress: application.address, applicantPhone: application.phone,
       applicantEmail: application.email, applicationId: application.id,
@@ -73,5 +74,5 @@ export async function POST(request: Request) {
     deliveryStatus = delivery.delivered ? 'sent' : 'in_app';
   } catch { deliveryStatus = 'failed'; }
   await admin.from('membership_applications').update({ letter_delivery_status: deliveryStatus }).eq('id', application.id);
-  return NextResponse.json({ applicationId: application.id, status: 'pending', message: 'Solicitud enviada a Secretaría con copia a la directiva. Recibirás una invitación solo si Secretaría la aprueba.' }, { status: 201 });
+  return NextResponse.json({ applicationId: application.id, status: 'pending', message: 'Solicitud enviada a la directiva. Recibirás una invitación cuando la persona responsable la apruebe.' }, { status: 201 });
 }

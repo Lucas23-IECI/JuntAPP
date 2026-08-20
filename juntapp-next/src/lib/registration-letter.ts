@@ -3,7 +3,7 @@ import { publicAppUrl, sendTransactionalEmail } from '@/lib/email';
 import { registrationRequestTemplate } from '@/lib/email-templates';
 
 type RegistrationLetter = {
-  secretaryEmail: string;
+  reviewerEmail: string;
   boardEmails: string[];
   juntaName: string;
   applicantName: string;
@@ -25,7 +25,7 @@ export async function sendRegistrationLetter(letter: RegistrationLetter) {
     reviewUrl: `${publicAppUrl()}/socios?solicitud=${letter.applicationId}`,
   });
   return sendTransactionalEmail({
-    to: [letter.secretaryEmail, ...letter.boardEmails],
+    to: [letter.reviewerEmail, ...letter.boardEmails],
     ...template,
     idempotencyKey: `membership-request:${letter.applicationId}`,
   });

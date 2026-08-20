@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { rateLimit } from '@/lib/rate-limit';
 import { authActionUrl, publicAppUrl, sendEmailBestEffort, sendTransactionalEmail } from '@/lib/email';
 import { membershipInviteTemplate, membershipRejectedTemplate } from '@/lib/email-templates';
+import { canReviewMembershipApplications } from '@/lib/membership-review';
 
 const decisionSchema = z.object({
   decision: z.enum(['approve', 'reject']),
@@ -20,12 +21,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!rateLimit(`membership-decision:${user.id}`, 20, 60_000).allowed) return NextResponse.json({ error: 'Espera antes de resolver otra solicitud.' }, { status: 429 });
   const parsed = decisionSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: 'La decisión o su motivo no son válidos.' }, { status: 400 });
-  const { data: secretary } = await supabase.from('profiles').select('id, junta_id, role, board_position').eq('id', user.id).single();
-  if (!secretary || secretary.role !== 'dirigente' || secretary.board_position !== 'secretario') {
-    return NextResponse.json({ error: 'Solo Secretaría puede aceptar o rechazar solicitudes de ingreso.' }, { status: 403 });
-  }
   const admin = createAdminClient();
-  const { data: application } = await admin.from('membership_applications').select('*, juntas(invite_code, name)').eq('id', applicationId).eq('junta_id', secretary.junta_id).maybeSingle();
+  const { data: reviewer } = await supabase.from('profiles').select('id, junta_id, role, board_position').eq('id', user.id).single();
+  if (!reviewer) return NextResponse.json({ error: 'No encontramos tu perfil en la directiva.' }, { status: 403 });
+  const [{ data: designatedSecretary }, { data: reviewerJunta }] = await Promise.all([
+    admin.from('profiles').select('id').eq('junta_id', reviewer.junta_id).eq('role', 'dirigente').eq('board_position', 'secretario').maybeSingle(),
+    admin.from('juntas').select('owner_id').eq('id', reviewer.junta_id).maybeSingle(),
+  ]);
+  if (!canReviewMembershipApplications(reviewer, Boolean(designatedSecretary), reviewerJunta?.owner_id ?? null)) {
+    return NextResponse.json({ error: designatedSecretary ? 'Solo Secretaría puede aceptar o rechazar solicitudes de ingreso.' : 'Mientras no exista Secretaría, solo Presidencia o el titular de la junta puede resolver solicitudes.' }, { status: 403 });
+  }
+  const { data: application } = await admin.from('membership_applications').select('*, juntas(invite_code, name)').eq('id', applicationId).eq('junta_id', reviewer.junta_id).maybeSingle();
   if (!application) return NextResponse.json({ error: 'Solicitud no encontrada.' }, { status: 404 });
   if (application.status !== 'pending') return NextResponse.json({ error: 'La solicitud ya fue resuelta.' }, { status: 409 });
   const junta = Array.isArray(application.juntas) ? application.juntas[0] : application.juntas;
@@ -84,6 +90,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await admin.from('membership_applications').update({ status: 'pending', reviewed_by: null, reviewed_at: null, updated_at: new Date().toISOString() }).eq('id', application.id).eq('status', 'approved').eq('reviewed_by', user.id);
     return NextResponse.json({ error: error instanceof Error ? error.message : 'No fue posible enviar la invitación de acceso.' }, { status: 503 });
   }
-  await admin.from('notifications').insert({ user_id: invited.user.id, type: 'registro', title: 'Solicitud aprobada', message: 'Secretaría aprobó tu ingreso. Activa tu contraseña desde el correo de invitación.', read: false, date: new Date().toISOString(), action: '/inicio' });
+  await admin.from('notifications').insert({ user_id: invited.user.id, type: 'registro', title: 'Solicitud aprobada', message: 'La directiva aprobó tu ingreso. Activa tu contraseña desde el correo de invitación.', read: false, date: new Date().toISOString(), action: '/inicio' });
   return NextResponse.json({ status: 'approved', userId: invited.user.id });
 }

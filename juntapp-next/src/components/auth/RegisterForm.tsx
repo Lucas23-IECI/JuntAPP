@@ -309,7 +309,7 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan }: { 
             placeholder="ABC123"
           />
           <p className="form-help">
-            La solicitud será enviada a Secretaría con copia a toda la directiva. No podrás ingresar hasta que Secretaría la apruebe.
+            La solicitud será enviada a la directiva. No podrás ingresar hasta que la persona responsable la apruebe.
           </p>
         </div>
       ) : (
@@ -368,7 +368,7 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan }: { 
           disabled={loading}
           className="btn btn-primary btn-grow"
         >
-          {loading ? 'Enviando...' : juntaAction === 'create' ? 'Continuar a la suscripción mensual' : 'Enviar solicitud a Secretaría'}
+          {loading ? 'Enviando...' : juntaAction === 'create' ? 'Continuar a la suscripción mensual' : 'Enviar solicitud a la directiva'}
         </button>
       </div>
     </form>

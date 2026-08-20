@@ -45,7 +45,7 @@ export function registrationRequestTemplate(input: {
   applicantPhone: string; applicantEmail: string; reviewUrl?: string;
 }): EmailTemplate {
   const title = `Solicitud de ingreso — ${input.juntaName}`;
-  const content = paragraph('Secretaría debe revisar y resolver esta solicitud antes de que la persona pueda ingresar a JuntAPP.')
+  const content = paragraph('La persona responsable de la directiva debe revisar y resolver esta solicitud antes de que la persona pueda ingresar a JuntAPP.')
     + detailRows([
       ['Nombre', input.applicantName], ['RUT', input.applicantRut], ['Dirección', input.applicantAddress],
       ['Teléfono', input.applicantPhone], ['Correo', input.applicantEmail],
@@ -105,7 +105,7 @@ export function juntaOwnerInviteTemplate(input: {
 }
 
 export function membershipRejectedTemplate(input: { name: string; juntaName: string; reason: string }): EmailTemplate {
-  const content = paragraph(`Hola ${input.name}, Secretaría revisó tu solicitud de ingreso a ${input.juntaName}.`)
+  const content = paragraph(`Hola ${input.name}, la directiva revisó tu solicitud de ingreso a ${input.juntaName}.`)
     + detailRows([['Resultado', 'Solicitud rechazada'], ['Motivo', input.reason]])
     + paragraph('Si necesitas aclarar la decisión o corregir antecedentes, comunícate directamente con la junta vecinal.');
   return { subject: `Resultado de tu solicitud — ${input.juntaName}`, html: layout('Resultado de tu solicitud', content) };
