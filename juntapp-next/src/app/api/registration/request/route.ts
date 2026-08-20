@@ -74,5 +74,5 @@ export async function POST(request: Request) {
     deliveryStatus = delivery.delivered ? 'sent' : 'in_app';
   } catch { deliveryStatus = 'failed'; }
   await admin.from('membership_applications').update({ letter_delivery_status: deliveryStatus }).eq('id', application.id);
-  return NextResponse.json({ applicationId: application.id, status: 'pending', message: 'Solicitud enviada a la directiva. Recibirás una invitación cuando la persona responsable la apruebe.' }, { status: 201 });
+  return NextResponse.json({ applicationId: application.id, status: 'pending', message: 'Solicitud enviada a la directiva. Cuando sea aprobada, recibirás un correo para activar tu cuenta y crear una contraseña segura de al menos 8 caracteres.' }, { status: 201 });
 }

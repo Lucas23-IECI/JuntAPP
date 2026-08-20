@@ -54,10 +54,6 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan }: { 
       setError('Por favor, ingrese un RUT válido.');
       return;
     }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
     if (!/^(?:56)?9\d{8}$/.test(phone.replace(/\D/g, ''))) {
       setError('Ingresa un número de celular chileno válido, por ejemplo +56 9 1234 5678.');
       return;
@@ -71,6 +67,9 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan }: { 
     setLoading(true);
 
     try {
+      if (juntaAction === 'create' && password.length < 8) {
+        throw new Error('La contraseña debe tener al menos 8 caracteres.');
+      }
       if (juntaAction === 'create' && !isValidChileLocation(juntaRegion, juntaComuna)) {
         throw new Error('Selecciona una región y comuna válidas.');
       }
@@ -228,22 +227,6 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan }: { 
           </div>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="reg-password" className="form-label">
-            Contraseña
-          </label>
-          <input
-            id="reg-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="form-input"
-            placeholder="Mínimo 6 caracteres"
-          />
-        </div>
-
         {error && (
           <div className="auth-error-message">{error}</div>
         )}
@@ -265,10 +248,10 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan }: { 
         <p className="text-sm font-medium text-success">{success}</p>
         <button
           type="button"
-          onClick={() => router.push('/login')}
+          onClick={() => router.push(juntaAction === 'join' ? '/' : '/login')}
           className="mt-4 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
         >
-          Ir a iniciar sesión
+          {juntaAction === 'join' ? 'Volver al inicio' : 'Ir a iniciar sesión'}
         </button>
       </div>
     );
@@ -343,6 +326,22 @@ export default function RegisterForm({ initialInviteCode = '', initialPlan }: { 
                 {getCommunes(juntaRegion).map((comuna) => <option value={comuna} key={comuna}>{comuna}</option>)}
               </select>
             </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="reg-password" className="form-label">
+              Contraseña de la cuenta administradora
+            </label>
+            <input
+              id="reg-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              className="form-input"
+              placeholder="Mínimo 8 caracteres"
+            />
           </div>
           <fieldset className="registration-plan-picker"><legend>Elige tu plan</legend>{Object.values(PLANS).map((item) => <label className={plan === item.id ? 'selected' : ''} key={item.id}><input type="radio" name="plan" checked={plan === item.id} onChange={() => setPlan(item.id)} /><span><strong>{item.name}</strong><small>${formatCLP(item.price)} / mes</small></span></label>)}</fieldset>
           <label className="registration-addon registration-addon-upcoming"><input type="checkbox" disabled /> WhatsApp masivo <strong>Próximamente</strong></label>
